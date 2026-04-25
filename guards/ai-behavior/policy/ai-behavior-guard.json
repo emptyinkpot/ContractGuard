@@ -1,0 +1,90 @@
+{
+  "defaultDocCandidates": [
+    "AGENTS.md",
+    "README.md",
+    "codex/PROJECT-CONTEXT.md"
+  ],
+  "boundaryFilePatterns": [
+    "gateway",
+    "proxy",
+    "provider",
+    "route",
+    "routing",
+    "ingress",
+    "endpoint",
+    "base_url",
+    "config",
+    "pool",
+    "entry"
+  ],
+  "requiredCheckPatterns": [
+    "/health",
+    "/debug",
+    "/debug/providers",
+    "/debug/routes",
+    "/upstreams",
+    "/v1/models",
+    "requestId",
+    "clientRequestId",
+    "traceId"
+  ],
+  "rules": [
+    {
+      "id": "architecture_new_proxy",
+      "category": "architecture",
+      "severity": "high",
+      "penalty": 20,
+      "pattern": "\\b(proxy_pass|reverse\\s+proxy|new\\s+proxy|新增反代|新增代理)\\b",
+      "message": "检测到新代理/反代语义，先确认是否应修 canonical path。"
+    },
+    {
+      "id": "architecture_new_endpoint",
+      "category": "architecture",
+      "severity": "high",
+      "penalty": 15,
+      "pattern": "\\b(app\\.(get|post|put|patch|delete)|router\\.(get|post|put|patch|delete)|new\\s+endpoint|新增\\s*endpoint|新增\\s*入口)\\b",
+      "message": "检测到新入口或新 endpoint 语义，需确认是否偏离既有 contract。"
+    },
+    {
+      "id": "cost_new_provider",
+      "category": "cost",
+      "severity": "high",
+      "penalty": 20,
+      "pattern": "\\b(new\\s+provider|paid\\s+provider|新增\\s*provider|新增\\s*模型供应方)\\b",
+      "message": "检测到新增 provider 语义，需确认成本和授权边界。"
+    },
+    {
+      "id": "repair_replace_path",
+      "category": "repair",
+      "severity": "medium",
+      "penalty": 15,
+      "pattern": "\\b(replace\\s+the\\s+original\\s+path|alternate\\s+path|替换原链路|直接替换方案|绕过原链路)\\b",
+      "message": "检测到直接替换原链路的语义，需确认是否已做原位修复尝试。"
+    },
+    {
+      "id": "path_noncanonical_entry",
+      "category": "path",
+      "severity": "high",
+      "penalty": 15,
+      "pattern": "\\b(127\\.0\\.0\\.1:3001|127\\.0\\.0\\.1:5000|localhost:3001|localhost:5000|/gateway/|/api/key-guard/)\\b",
+      "message": "检测到敏感入口或端口语义，需与 canonical entry 明确比对。"
+    },
+    {
+      "id": "repair_skip_troubleshooting",
+      "category": "repair",
+      "severity": "medium",
+      "penalty": 10,
+      "pattern": "\\b(skip\\s+troubleshooting|跳过排障|未复现问题|未检查 canonical path)\\b",
+      "message": "检测到跳过排障或未检查 canonical path 的语义。"
+    }
+  ],
+  "hardBlockRules": [
+    {
+      "id": "hard_bypass_pool",
+      "category": "architecture",
+      "severity": "critical",
+      "pattern": "\\b(bypass\\s+(the\\s+)?(pool|gateway)|direct\\s+provider|绕过\\s*(pool|gateway)|直连\\s*provider)\\b",
+      "message": "检测到绕过 canonical pool/gateway 或直连 provider。"
+    }
+  ]
+}

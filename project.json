@@ -1,0 +1,13 @@
+{
+  "$schema": "./templates/project-contract/project.schema.json",
+  "projectName": "ContractGuard",
+  "canonicalDoc": "README.md",
+  "machineReadableEntry": "project.json",
+  "githubRepo": "local-only",
+  "defaultBranch": "main",
+  "localSourceRoot": "E:\\My Project\\ContractGuard",
+  "guardRoot": "guards/ai-behavior",
+  "schemaRoot": "templates/project-contract",
+  "validationTool": "tools/validate-project-contract.mjs",
+  "status": "active"
+}

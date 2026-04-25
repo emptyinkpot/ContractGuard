@@ -1,0 +1,11 @@
+{
+  "name": "contract-guard",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Reusable project contract schema and AI behavior gate for multi-repo use.",
+  "type": "module",
+  "scripts": {
+    "validate:project": "node tools/validate-project-contract.mjs project.json",
+    "selftest:guard": "node guards/ai-behavior/core/check-ai-behavior.mjs --repo-root . --self-test"
+  }
+}

@@ -1,0 +1,215 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atramenti.local/schemas/project.schema.json",
+  "title": "Atramenti Project Contract",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "projectName",
+    "canonicalDoc",
+    "machineReadableEntry",
+    "githubRepo",
+    "defaultBranch",
+    "localSourceRoot",
+    "status"
+  ],
+  "properties": {
+    "projectName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "canonicalDoc": {
+      "type": "string",
+      "const": "README.md"
+    },
+    "machineReadableEntry": {
+      "type": "string",
+      "const": "project.json"
+    },
+    "githubRepo": {
+      "type": "string",
+      "pattern": "^(https://github\\.com/.+|local-only)$"
+    },
+    "defaultBranch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "localSourceRoot": {
+      "type": "string",
+      "minLength": 1
+    },
+    "codexRoot": {
+      "type": "string",
+      "minLength": 1
+    },
+    "publicConsoleUrl": {
+      "type": "string"
+    },
+    "publicConsoleHealthPath": {
+      "type": "string"
+    },
+    "publicConsoleSummaryPath": {
+      "type": "string"
+    },
+    "localConsoleUrl": {
+      "type": "string"
+    },
+    "localConsoleHealthUrl": {
+      "type": "string"
+    },
+    "localGatewayUrl": {
+      "type": "string"
+    },
+    "localGatewayHealthUrl": {
+      "type": "string"
+    },
+    "consoleWebInternalUrl": {
+      "type": "string"
+    },
+    "preferredActiveServer": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "host"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1
+        },
+        "sourceRoot": {
+          "type": "string"
+        },
+        "runtimeRoot": {
+          "type": "string"
+        }
+      }
+    },
+    "legacyVerifiedConsoleServer": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "host"
+      ],
+      "properties": {
+        "host": {
+          "type": "string",
+          "minLength": 1
+        },
+        "runtimeRoot": {
+          "type": "string"
+        }
+      }
+    },
+    "capabilityRoots": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "apps",
+        "mcps",
+        "plugins",
+        "skills"
+      ],
+      "properties": {
+        "apps": {
+          "type": "string"
+        },
+        "mcps": {
+          "type": "string"
+        },
+        "plugins": {
+          "type": "string"
+        },
+        "skills": {
+          "type": "string"
+        },
+        "guards": {
+          "type": "string"
+        }
+      }
+    },
+    "canonicalDocs": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "projectContext",
+        "sessionHandoff",
+        "planLedger"
+      ],
+      "properties": {
+        "projectContext": {
+          "type": "string"
+        },
+        "sessionHandoff": {
+          "type": "string"
+        },
+        "planLedger": {
+          "type": "string"
+        },
+        "serverOpsManual": {
+          "type": "string"
+        },
+        "frontendDesignSpec": {
+          "type": "string"
+        },
+        "aiBehaviorGuard": {
+          "type": "string"
+        }
+      }
+    },
+    "installEntry": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "packageManager": {
+          "type": "string"
+        },
+        "install": {
+          "type": "string"
+        },
+        "devAll": {
+          "type": "string"
+        },
+        "devUi": {
+          "type": "string"
+        },
+        "devGateway": {
+          "type": "string"
+        },
+        "ci": {
+          "type": "string"
+        },
+        "pluginsReport": {
+          "type": "string"
+        }
+      }
+    },
+    "executionGateway": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "mode"
+      ],
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": [
+            "project-plan-context",
+            "disabled"
+          ]
+        },
+        "aiBehaviorGuardRoot": {
+          "type": "string"
+        }
+      }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "paused",
+        "archived"
+      ]
+    }
+  }
+}
