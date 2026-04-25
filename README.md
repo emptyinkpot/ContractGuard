@@ -90,7 +90,7 @@ consumer repo
 | `guards/ai-behavior` | AI 行为分析、评分、plan/diff gate hook |
 | `templates/project-contract` | `project.json` 合同模板与 schema |
 | `tools` | 本地 validator 与辅助工具 |
-| `docs` | 后续扩展文档、接入说明、迁移说��� |
+| `docs` | 接入说明、迁移说明与 consumer 指南 |
 
 ## 2. Constraint Layer
 
@@ -128,6 +128,7 @@ consumer repo
 
 - `README.md`
 - `project.json`
+- `docs/consumer-integration.md`
 - `templates/project-contract/README.md`
 - `templates/project-contract/project.schema.json`
 - `guards/ai-behavior/core/check-ai-behavior.mjs`
