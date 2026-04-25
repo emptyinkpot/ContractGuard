@@ -22,7 +22,7 @@ function Get-RepoRoot {
 
     $output = & git -C $resolved rev-parse --show-toplevel 2>$null
     if ($LASTEXITCODE -ne 0) {
-        throw "未解析到 Git repo：$resolved"
+        throw "Git repo not found for path: $resolved"
     }
 
     return ($output | Select-Object -First 1).Trim()
@@ -41,7 +41,7 @@ function Normalize-GitPath {
 $guardRoot = Join-Path $ProjectRoot 'guards\ai-behavior'
 $guardCli = Join-Path $guardRoot 'core\check-ai-behavior.mjs'
 if (-not (Test-Path -LiteralPath $guardCli)) {
-    throw "AI behavior guard CLI 不存在：$guardCli"
+    throw "AI behavior guard CLI not found: $guardCli"
 }
 
 $runtimeDir = Join-Path $ProjectRoot '.runtime\ai-behavior-guard'
@@ -78,11 +78,11 @@ if ($relativePaths.Count -gt 0) {
 }
 $changedFiles = @(& git -C $repoRoot @nameOnlyArgs)
 if ($LASTEXITCODE -ne 0) {
-    throw '读取 staged changed files 失败。'
+    throw 'Failed to read staged changed files.'
 }
 $changedFiles = @($changedFiles | ForEach-Object { $_.Trim() } | Where-Object { $_ })
 if ($changedFiles.Count -eq 0) {
-    throw '当前暂存区没有可供 diff gate 审核的改动。'
+    throw 'No staged changes available for diff gate review.'
 }
 
 $diffArgs = @('diff', '--cached', '--no-color')
@@ -92,7 +92,7 @@ if ($relativePaths.Count -gt 0) {
 }
 $diffText = & git -C $repoRoot @diffArgs
 if ($LASTEXITCODE -ne 0) {
-    throw '读取 staged diff 失败。'
+    throw 'Failed to read staged diff.'
 }
 
 Set-Content -LiteralPath $changedFilesFile -Value $changedFiles -Encoding utf8
@@ -102,7 +102,7 @@ Set-Content -LiteralPath $diffFile -Value $diffText -Encoding utf8
 $exitCode = $LASTEXITCODE
 
 if (-not (Test-Path -LiteralPath $resultFile)) {
-    throw "diff gate 未生成结果文件：$resultFile"
+    throw "diff gate did not produce a result file: $resultFile"
 }
 
 $result = Get-Content -LiteralPath $resultFile -Raw -Encoding utf8 | ConvertFrom-Json
@@ -127,6 +127,6 @@ if ($result.verdict -eq 'review' -and $BlockOnReview) {
 }
 
 if ($exitCode -ne 0 -and $result.verdict -ne 'block') {
-    throw "diff gate 执行失败，退出码：$exitCode"
+    throw "diff gate execution failed with exit code: $exitCode"
 }
 
