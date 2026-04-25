@@ -128,6 +128,7 @@ consumer repo
 
 - `README.md`
 - `project.json`
+- `docs/quickstart.md`
 - `docs/consumer-integration.md`
 - `templates/project-contract/README.md`
 - `templates/project-contract/project.schema.json`
