@@ -1,0 +1,85 @@
+{
+  "$schema": "./schemas/master-control.schema.json",
+  "version": "1.0.0",
+  "enabled": true,
+  "last_updated": "2026-04-26T00:00:00Z",
+
+  "global_switches": {
+    "auto_commit": {
+      "enabled": true,
+      "description": "是否允许自动提交",
+      "policy_ref": "policies/global-behavior-policy.json#auto_commit"
+    },
+    "auto_push": {
+      "enabled": true,
+      "description": "是否允许自动推送",
+      "policy_ref": "policies/github-delivery-policy.json#auto_push"
+    },
+    "auto_cicd_check": {
+      "enabled": true,
+      "description": "推送后是否自动检查 CI/CD",
+      "policy_ref": "policies/cicd-trigger-policy.json#auto_check"
+    },
+    "auto_deploy_verify": {
+      "enabled": true,
+      "description": "是否自动验证部署结果",
+      "policy_ref": "policies/cicd-trigger-policy.json#auto_verify"
+    },
+    "require_approval": {
+      "enabled": false,
+      "description": "是否需要用户审批",
+      "policy_ref": "policies/approval-policy.json#require_approval"
+    }
+  },
+
+  "behavior_modes": {
+    "current_mode": "autonomous",
+    "available_modes": {
+      "autonomous": {
+        "description": "完全自主：自动 commit/push/check CI",
+        "auto_commit": true,
+        "auto_push": true,
+        "auto_cicd_check": true,
+        "auto_deploy_verify": true,
+        "require_approval": false
+      },
+      "semi_autonomous": {
+        "description": "半自主：自动 commit，推送前询问",
+        "auto_commit": true,
+        "auto_push": false,
+        "auto_cicd_check": true,
+        "auto_deploy_verify": true,
+        "require_approval": true
+      },
+      "manual": {
+        "description": "手动模式：所有操作都需要确认",
+        "auto_commit": false,
+        "auto_push": false,
+        "auto_cicd_check": false,
+        "auto_deploy_verify": false,
+        "require_approval": true
+      }
+    }
+  },
+
+  "integration": {
+    "codex_config_path": "C:\\Users\\ASUS-KL\\.codex\\config.toml",
+    "claude_config_path": "C:\\Users\\ASUS-KL\\CLAUDE.md",
+    "contractguard_root": "E:\\My Project\\ContractGuard",
+    "sync_on_change": true,
+    "sync_script": "./tools/sync-all.mjs"
+  },
+
+  "audit": {
+    "enabled": true,
+    "log_path": "./logs/gate-audit.log",
+    "retention_days": 30,
+    "log_format": "json"
+  },
+
+  "comments": {
+    "purpose": "这是 Unified Gates 的主控文件，控制所有执行行为",
+    "usage": "通过 tools/ 下的脚本修改，不要手动编辑",
+    "sync": "修改后需要运行 sync-all.mjs 同步到 Codex/Claude"
+  }
+}

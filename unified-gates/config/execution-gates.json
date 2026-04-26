@@ -1,0 +1,90 @@
+{
+  "$schema": "../schemas/execution-gates.schema.json",
+  "version": "1.0.0",
+  "last_updated": "2026-04-26T00:00:00Z",
+
+  "gates": {
+    "pre_commit": {
+      "enabled": true,
+      "script": "../gates/pre-commit.mjs",
+      "description": "提交前门禁：检查是否允许 commit",
+      "checks": [
+        "auto_commit_enabled",
+        "changes_exist",
+        "no_conflicts",
+        "not_blocked"
+      ],
+      "timeout_ms": 5000,
+      "on_failure": "block"
+    },
+    "pre_push": {
+      "enabled": true,
+      "script": "../gates/pre-push.mjs",
+      "description": "推送前门禁：检查是否允许 push",
+      "checks": [
+        "auto_push_enabled",
+        "remote_configured",
+        "changes_verified",
+        "branch_state_ok",
+        "not_behind_remote"
+      ],
+      "timeout_ms": 10000,
+      "on_failure": "block"
+    },
+    "post_push": {
+      "enabled": true,
+      "script": "../gates/post-push.mjs",
+      "description": "推送后门禁：检查 CI/CD 状态",
+      "checks": [
+        "auto_cicd_check_enabled",
+        "detect_workflows",
+        "wait_for_workflows",
+        "verify_workflow_status"
+      ],
+      "timeout_ms": 300000,
+      "on_failure": "report"
+    },
+    "pre_deploy": {
+      "enabled": true,
+      "script": "../gates/pre-deploy.mjs",
+      "description": "部署前门禁：检查是否允许 deploy",
+      "checks": [
+        "auto_deploy_verify_enabled",
+        "ci_passed",
+        "approval_if_required"
+      ],
+      "timeout_ms": 10000,
+      "on_failure": "block"
+    }
+  },
+
+  "gate_execution_order": [
+    "pre_commit",
+    "pre_push",
+    "post_push",
+    "pre_deploy"
+  ],
+
+  "audit": {
+    "log_all_gate_executions": true,
+    "log_path": "../logs/gate-audit.log",
+    "log_format": "json",
+    "include_timestamp": true,
+    "include_gate_name": true,
+    "include_result": true,
+    "include_reason": true,
+    "include_duration_ms": true
+  },
+
+  "error_handling": {
+    "retry_on_transient_error": false,
+    "max_retries": 0,
+    "continue_on_gate_error": false,
+    "report_gate_errors": true
+  },
+
+  "comments": {
+    "purpose": "定义所有执行门禁的配置和执行顺序",
+    "integration": "与 ContractGuard 主系统的 plan gate 和 diff gate 配合使用"
+  }
+}

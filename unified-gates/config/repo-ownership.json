@@ -1,0 +1,100 @@
+{
+  "$schema": "../schemas/repo-ownership.schema.json",
+  "version": "1.0.0",
+  "last_updated": "2026-04-26T00:00:00Z",
+  "source": "C:\\Users\\ASUS-KL\\.codex\\REPO-OWNERSHIP-MAP.md",
+
+  "repos": [
+    {
+      "path": "C:\\Users\\ASUS-KL\\.codex",
+      "role": "mirror/backup repo",
+      "owned_boundaries": ["全局 Codex consumer 层：规则、配置、自动化、本机状态"],
+      "first_party_commits": "limited",
+      "remote": "asus-kl-codex-home",
+      "sync_order": 1,
+      "auto_push_enabled": true
+    },
+    {
+      "path": "E:\\My Project\\Atramenti-Console",
+      "role": "owning repo",
+      "owned_boundaries": ["console.tengokukk.com 产品代码、公开 README、公开仓展示面"],
+      "first_party_commits": "yes",
+      "remote": "origin",
+      "sync_order": 1,
+      "auto_push_enabled": true
+    },
+    {
+      "path": "E:\\My Project\\Mortis",
+      "role": "owning repo",
+      "owned_boundaries": ["Mortis / multica 主产品源码真源"],
+      "first_party_commits": "yes",
+      "remote": "mortis-multica-source",
+      "sync_order": 1,
+      "auto_push_enabled": true
+    },
+    {
+      "path": "E:\\My Project\\MyBlog",
+      "role": "owning repo",
+      "owned_boundaries": ["emptyinkpot.github.io / MyBlog 的可编辑站点源码"],
+      "first_party_commits": "yes",
+      "remote": "origin",
+      "sync_order": 1,
+      "auto_push_enabled": true
+    },
+    {
+      "path": "E:\\My Project\\Token Pool",
+      "role": "owning repo",
+      "owned_boundaries": ["Token Pool 网关源码"],
+      "first_party_commits": "yes",
+      "remote": "origin",
+      "sync_order": 1,
+      "auto_push_enabled": true
+    },
+    {
+      "path": "E:\\My Project\\ContractGuard",
+      "role": "owning repo",
+      "owned_boundaries": ["通用治理仓 / 可复用 contract + behavior gate"],
+      "first_party_commits": "yes",
+      "remote": "local-only",
+      "sync_order": 1,
+      "auto_push_enabled": false,
+      "note": "当前为 local-only，未来可能推送到 GitHub"
+    },
+    {
+      "path": "E:\\My Project",
+      "role": "umbrella repo",
+      "owned_boundaries": ["私有 workspace backup、库存、未独立拆出的目录"],
+      "first_party_commits": "limited",
+      "remote": "my-project-root",
+      "sync_order": 2,
+      "auto_push_enabled": false,
+      "note": "不能抢占已独立子仓边界；只在 owning repo 收口后再吸收结果"
+    }
+  ],
+
+  "default_rules": {
+    "owning_repo_first": true,
+    "umbrella_repo_second": true,
+    "mirror_repo_last": true,
+    "github_is_source_of_truth": true,
+    "server_is_deploy_target_only": true
+  },
+
+  "sync_strategy": {
+    "description": "先在 owning repo 完成 status -> commit -> push，再同步到 umbrella repo",
+    "order": [
+      "owning repo (sync_order=1)",
+      "umbrella repo (sync_order=2)",
+      "mirror/backup repo (sync_order=3)"
+    ]
+  },
+
+  "comments": {
+    "extracted_from": "C:\\Users\\ASUS-KL\\.codex\\REPO-OWNERSHIP-MAP.md",
+    "key_rules": [
+      "对 repo-managed code，GitHub 中 owning repo 是唯一长期 source of truth",
+      "不要默认在 deploy server 上并行维护源码",
+      "先按 repo role + change boundary 判断，不按仓大/仓小或路径远近判断"
+    ]
+  }
+}

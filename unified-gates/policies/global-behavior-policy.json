@@ -1,0 +1,65 @@
+{
+  "$schema": "../schemas/global-behavior-policy.schema.json",
+  "version": "1.0.0",
+  "last_updated": "2026-04-26T00:00:00Z",
+
+  "execution_policy": {
+    "approval_policy": "never",
+    "sandbox_mode": "danger-full-access",
+    "default_execution_mode": "autonomous"
+  },
+
+  "task_completion_gates": {
+    "require_plan": true,
+    "require_verification": true,
+    "require_deploy_decision": true,
+    "require_delivery_state": true,
+    "require_live_verification_for_user_visible_changes": true
+  },
+
+  "git_behavior": {
+    "prefer_commit_and_push": true,
+    "verify_branch_state": true,
+    "check_ahead_behind": true,
+    "default_to_owning_repo": true,
+    "identify_owning_repo_before_commit": true
+  },
+
+  "deploy_behavior": {
+    "default_deploy_on_completion": true,
+    "verify_deploy_success": true,
+    "distinguish_push_from_deploy": true,
+    "require_workflow_check_for_auto_deploy": true
+  },
+
+  "verification_requirements": {
+    "user_visible_changes": "live_verification_required",
+    "runtime_changes": "behavioral_verification_required",
+    "config_changes": "validation_required",
+    "documentation_changes": "review_recommended"
+  },
+
+  "auto_commit": {
+    "enabled": true,
+    "description": "代码修改后自动提交",
+    "conditions": {
+      "require_changes_exist": true,
+      "require_no_conflicts": true,
+      "skip_if_blocked": true
+    }
+  },
+
+  "comments": {
+    "extracted_from": [
+      "C:\\Users\\ASUS-KL\\.codex\\AGENTS.md - Runtime Protocol",
+      "C:\\Users\\ASUS-KL\\.codex\\AGENTS.md - Task Gates",
+      "C:\\Users\\ASUS-KL\\.codex\\config.toml"
+    ],
+    "key_rules": [
+      "非平凡工作没有 plan，不算正式开始",
+      "任何会改变 runnable behavior 的工作，结束前必须记录 deploy decision",
+      "user-visible 变更结束前必须记录 live verification decision",
+      "repo-managed work 结束前必须明确 delivery state"
+    ]
+  }
+}

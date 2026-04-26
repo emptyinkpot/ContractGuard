@@ -1,0 +1,72 @@
+{
+  "$schema": "../schemas/cicd-trigger-policy.schema.json",
+  "version": "1.0.0",
+  "last_updated": "2026-04-26T00:00:00Z",
+
+  "auto_check": {
+    "enabled": true,
+    "description": "推送后自动检查 CI/CD workflow",
+    "check_delay_seconds": 10,
+    "max_wait_seconds": 300,
+    "poll_interval_seconds": 30,
+    "timeout_action": "report"
+  },
+
+  "auto_verify": {
+    "enabled": true,
+    "description": "自动验证 workflow 是否成功",
+    "require_all_checks_pass": true,
+    "fail_on_workflow_failure": true,
+    "report_partial_success": true
+  },
+
+  "workflow_detection": {
+    "auto_detect_workflows": true,
+    "workflow_patterns": [
+      "**/.github/workflows/*.yml",
+      "**/.github/workflows/*.yaml"
+    ],
+    "trigger_keywords": ["deploy", "release", "publish", "ci", "cd", "build", "test"],
+    "ignore_workflows": ["dependabot", "stale"]
+  },
+
+  "reporting": {
+    "report_workflow_status": true,
+    "report_format": "summary",
+    "include_workflow_name": true,
+    "include_trigger_scope": true,
+    "include_job_details": false,
+    "include_logs_on_failure": true
+  },
+
+  "failure_handling": {
+    "on_workflow_failure": "report",
+    "retry_on_transient_failure": false,
+    "notify_user": true,
+    "block_further_pushes": false
+  },
+
+  "push_vs_deploy_distinction": {
+    "enabled": true,
+    "description": "不要把 push 说成 deployed",
+    "require_workflow_verification": true,
+    "valid_deploy_states": [
+      "pushed + CI passed",
+      "pushed + CI failed",
+      "pushed + CI pending",
+      "pushed + no CI"
+    ]
+  },
+
+  "comments": {
+    "extracted_from": [
+      "C:\\Users\\ASUS-KL\\.codex\\AGENTS.md - Git And Repo Boundary",
+      "E:\\My Project\\Atramenti-Console\\codex\\mcps\\github-workflow-mcp\\server.mjs"
+    ],
+    "key_rules": [
+      "不要把 push 说成 deployed，除非真的运行了 deploy",
+      "若是 auto-deploy，要报告 workflow 名称与 trigger scope",
+      "推送后自动检查 CI/CD 状态"
+    ]
+  }
+}

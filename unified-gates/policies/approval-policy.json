@@ -1,0 +1,76 @@
+{
+  "$schema": "../schemas/approval-policy.schema.json",
+  "version": "1.0.0",
+  "last_updated": "2026-04-26T00:00:00Z",
+
+  "require_approval": {
+    "enabled": false,
+    "description": "是否需要用户审批",
+    "approval_modes": {
+      "never": "从不需要审批",
+      "always": "总是需要审批",
+      "conditional": "根据条件决定是否需要审批"
+    },
+    "current_mode": "never"
+  },
+
+  "conditional_approval": {
+    "enabled": false,
+    "conditions": {
+      "high_risk_operations": {
+        "enabled": true,
+        "operations": [
+          "force_push",
+          "delete_branch",
+          "modify_protected_branch",
+          "deploy_to_production"
+        ]
+      },
+      "large_changes": {
+        "enabled": true,
+        "threshold_files": 50,
+        "threshold_lines": 1000
+      },
+      "sensitive_files": {
+        "enabled": true,
+        "patterns": [
+          "**/.env",
+          "**/secrets/**",
+          "**/credentials/**",
+          "**/config/production/**"
+        ]
+      },
+      "external_operations": {
+        "enabled": true,
+        "operations": [
+          "api_calls_to_external_services",
+          "database_migrations",
+          "infrastructure_changes"
+        ]
+      }
+    }
+  },
+
+  "approval_workflow": {
+    "approval_timeout_seconds": 300,
+    "default_action_on_timeout": "deny",
+    "allow_skip_approval": false,
+    "require_reason_for_skip": true
+  },
+
+  "notification": {
+    "notify_on_approval_required": true,
+    "notification_channels": ["console", "log"],
+    "include_change_summary": true,
+    "include_risk_assessment": true
+  },
+
+  "comments": {
+    "extracted_from": [
+      "C:\\Users\\ASUS-KL\\.codex\\config.toml - approval_policy",
+      "C:\\Users\\ASUS-KL\\.codex\\AGENTS.md - Runtime Protocol"
+    ],
+    "current_setting": "approval_policy = never (from config.toml)",
+    "note": "当前设置为 never，与 autonomous 模式一致"
+  }
+}
