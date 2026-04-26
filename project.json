@@ -6,8 +6,31 @@
   "githubRepo": "local-only",
   "defaultBranch": "main",
   "localSourceRoot": "E:\\My Project\\ContractGuard",
+  "codexCompatRoot": "codex",
   "guardRoot": "guards/ai-behavior",
   "schemaRoot": "templates/project-contract",
   "validationTool": "tools/validate-project-contract.mjs",
-  "status": "active"
+  "taskPipelineEntry": "tools/task-pipeline/run-task-pipeline.mjs",
+  "taskPipelinePolicy": "tools/task-pipeline/policy/task-pipeline-policy.json",
+  "taskPipelineStages": [
+    "compiler",
+    "planner",
+    "plan-gate",
+    "safety-verifier",
+    "staged-executor",
+    "diff-gate",
+    "trace-auditor"
+  ],
+  "globalGatewayContractPath": "C:\\Users\\ASUS-KL\\.codex\\rules\\contractguard-gateway.json",
+  "executionGateway": {
+    "mode": "project-plan-context",
+    "role": "global-fallback-gate-root"
+  },
+  "status": "active",
+  "description": "Reusable governance repo for project contracts, AI behavior gates, and task-compilation-first safe execution guidance.",
+  "governancePatterns": [
+    "project-contract",
+    "ai-behavior-gate",
+    "task-compiler-safe-execution"
+  ]
 }

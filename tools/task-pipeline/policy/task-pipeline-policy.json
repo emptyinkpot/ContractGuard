@@ -1,0 +1,99 @@
+{
+  "maxRefinementDepth": 3,
+  "manualHandoffOnMaxDepth": true,
+  "defaultRefinementType": "analysis",
+  "traceStagesRequired": [
+    "plan_gate_completed",
+    "safety_verifier_completed",
+    "start_stage",
+    "start_step",
+    "done_step",
+    "end_stage",
+    "staged_executor_completed",
+    "diff_gate_completed"
+  ],
+  "goalKeywordPolicy": {
+    "minimumTokenLength": 2,
+    "minCoverageRatio": 0.34,
+    "maxMissingKeywords": 4,
+    "ignoreTokens": [
+      "a",
+      "an",
+      "and",
+      "api",
+      "for",
+      "from",
+      "goal",
+      "local",
+      "of",
+      "or",
+      "repo",
+      "sdk",
+      "task",
+      "the",
+      "to",
+      "一个",
+      "一种",
+      "不要",
+      "不触达",
+      "分析",
+      "代码",
+      "代码骨架",
+      "只",
+      "和",
+      "在",
+      "设计",
+      "输出"
+    ]
+  },
+  "refinementRules": {
+    "analysis": [
+      {
+        "suffix": "risk-map",
+        "type": "analysis",
+        "prompt": "识别目标中的执行风险、外部依赖与必须保留的用户意图，不直接执行：\\n{{prompt}}"
+      },
+      {
+        "suffix": "local-scope",
+        "type": "analysis",
+        "prompt": "把可本地执行部分与需后续接管部分分离，保留原始意图与边界说明。"
+      }
+    ],
+    "design": [
+      {
+        "suffix": "contracts",
+        "type": "design",
+        "prompt": "把任务改写为模块合同、接口定义、状态机与执行顺序，不包含敏感字段。"
+      },
+      {
+        "suffix": "handoff",
+        "type": "design",
+        "prompt": "为后续完整执行生成接管点、输入输出合同与审计要求。"
+      }
+    ],
+    "codegen": [
+      {
+        "suffix": "interfaces",
+        "type": "codegen",
+        "prompt": "生成接口、类型、函数签名与本地占位实现，保留完整执行所需的扩展点。"
+      },
+      {
+        "suffix": "workflow",
+        "type": "codegen",
+        "prompt": "生成 orchestration 骨架、trace 字段与执行状态流，不写入敏感值。"
+      }
+    ],
+    "default": [
+      {
+        "suffix": "decomposed",
+        "type": "analysis",
+        "prompt": "将该步骤再次细分为更小的可执行单元，并保留原始目标：\\n{{prompt}}"
+      }
+    ]
+  },
+  "manualHandoffTemplate": {
+    "suffix": "manual-handoff",
+    "type": "design",
+    "prompt": "生成人工接管说明、执行前置条件与审计要求，保留用户意图与差异检查点。"
+  }
+}

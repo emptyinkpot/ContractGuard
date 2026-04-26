@@ -6,6 +6,8 @@
   "type": "module",
   "scripts": {
     "validate:project": "node tools/validate-project-contract.mjs project.json",
-    "selftest:guard": "node guards/ai-behavior/core/check-ai-behavior.mjs --repo-root . --self-test"
+    "selftest:guard": "node guards/ai-behavior/core/check-ai-behavior.mjs --repo-root . --self-test",
+    "run:task-pipeline": "node tools/task-pipeline/run-task-pipeline.mjs",
+    "selftest:task-pipeline": "node tools/task-pipeline/run-task-pipeline.mjs --self-test"
   }
 }
