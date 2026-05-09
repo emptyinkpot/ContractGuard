@@ -1,0 +1,35 @@
+{
+  "taskIsNonTrivial": false,
+  "taskType": "console-redesign",
+  "userRules": [],
+  "referenceSet": [],
+  "visualDirection": {
+    "theme": "modern",
+    "typeStrategy": "",
+    "colorStrategy": "clean",
+    "antiPatternsToAvoid": []
+  },
+  "informationArchitecture": {
+    "desktopPriority": [
+      "summary",
+      "actions"
+    ],
+    "mobilePriority": [
+      "summary",
+      "actions"
+    ],
+    "primaryActions": [],
+    "secondaryEvidence": []
+  },
+  "antiPatternCleanup": [
+    {
+      "pattern": "card-on-card",
+      "status": "kept-with-justification",
+      "note": ""
+    }
+  ],
+  "artifacts": {
+    "desktopScreenshot": "C:\\Users\\ASUS-KL\\.codex-runtime\\missing-desktop.png",
+    "mobileScreenshot": "C:\\Users\\ASUS-KL\\.codex-runtime\\missing-desktop.png"
+  }
+}

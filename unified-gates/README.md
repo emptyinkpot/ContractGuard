@@ -158,6 +158,39 @@ node "E:\My Project\ContractGuard\unified-gates\tools\sync-to-claude.mjs"
 node "E:\My Project\ContractGuard\unified-gates\tools\sync-all.mjs"
 ```
 
+### 5. 生成 policy derived report / validation
+
+```powershell
+# 只看预览，不写回 policy files
+node "E:\My Project\ContractGuard\unified-gates\tools\sync-all.mjs" --dry-run
+
+# 输出完整 report JSON
+node "E:\My Project\ContractGuard\unified-gates\tools\sync-all.mjs" --report
+
+# 对当前 report 做内建结构校验
+node "E:\My Project\ContractGuard\unified-gates\tools\sync-all.mjs" --validate-report --report
+
+# 打印 canonical schema 路径
+node "E:\My Project\ContractGuard\unified-gates\tools\sync-all.mjs" --schema
+```
+
+推荐用统一 wrapper：
+
+```powershell
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -Report
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -ValidateReport -Report
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -Report -OutFile C:\Users\ASUS-KL\.codex\.tmp\sync-report.json
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -ValidateReport -Report -OutFile C:\Users\ASUS-KL\.codex\.tmp\sync-validation.json
+```
+
+相关契约：
+
+- report schema:
+  - `E:\My Project\ContractGuard\unified-gates\schemas\sync-report.schema.json`
+- validation result schema:
+  - `E:\My Project\ContractGuard\unified-gates\schemas\sync-validation-result.schema.json`
+- `sync-all.mjs` 现在还会校验 `gate-registry.json` 与 `policy-map.json` 中所有 gate target 路径是否真实存在
+
 ---
 
 ## 🏗️ 架构概览
@@ -267,7 +300,13 @@ E:\My Project\ContractGuard\unified-gates\
 │       └── 本地验证后仍有未推送改动
 │
 ├── 🚪 门禁层 (gates/) - 执行检查
-│   ├── pre-commit.mjs                   # 提交前门禁 ⏳
+│   ├── verify-gate.mjs                  # verification checker ✅
+│   ├── deploy-decision-check.mjs        # deploy decision checker ✅
+│   ├── architecture-boundary-gate.mjs   # architecture boundary checker ✅
+│   ├── mode-classification-gate.mjs     # execution mode / RCA checker ✅
+│   ├── anti-overengineering-gate.mjs    # anti-overengineering checker ✅
+│   ├── frontend-design-gate.mjs         # frontend design closeout checker ✅
+│   ├── pre-commit.mjs                   # 提交前门禁 ✅
 │   ├── pre-push.mjs                     # 推送前门禁 ⏳
 │   ├── post-push.mjs                    # 推送后门禁 ⏳
 │   └── pre-deploy.mjs                   # 部署前门禁 ⏳
@@ -276,6 +315,22 @@ E:\My Project\ContractGuard\unified-gates\
 │   ├── codex-adapter.mjs                # Codex 适配器 ⏳
 │   ├── claude-adapter.mjs               # Claude 适配器 ⏳
 │   └── mcp-adapter.mjs                  # MCP 适配器 ⏳
+│
+├── 🧠 Execution Kernel v1 (kernel/)
+│   ├── README.md                        # kernel runtime 说明 ✅
+│   ├── core/
+│   │   ├── execution-kernel.mjs         # kernel entry skeleton ✅
+│   │   ├── mode-classifier.mjs          # mode classifier ✅
+│   │   ├── constraint-resolver.mjs      # constraint resolver ✅
+│   │   ├── plan-compiler.mjs            # DAG builder ✅
+│   │   ├── graph-scheduler.mjs          # scheduler ✅
+│   │   ├── checkpoint-store.mjs         # checkpoint store ✅
+│   │   └── observability-trace.mjs      # trace logger ✅
+│   └── contracts/
+│       ├── execution-graph.schema.json  # graph contract ✅
+│       ├── execution-state.schema.json  # state machine contract ✅
+│       ├── checkpoint.schema.json       # checkpoint contract ✅
+│       └── trace-event.schema.json      # trace event contract ✅
 │
 ├── 📊 Schema 层 (schemas/) - 验证配置
 │   ├── master-control.schema.json       # 主控文件 Schema ⏳
@@ -303,6 +358,7 @@ E:\My Project\ContractGuard\unified-gates\
 ├── 🧪 测试层 (tests/)
 │   ├── test-commit-gate.mjs             # 提交门禁测试 ⏳
 │   ├── test-push-gate.mjs               # 推送门禁测试 ⏳
+│   ├── test-frontend-design-gate.mjs    # 前端设计门禁测试 ✅
 │   └── test-integration.mjs             # 集成测试 ⏳
 │
 └── 📝 日志层 (logs/)

@@ -6,7 +6,11 @@ param(
 
     [string]$ProjectRoot = 'E:\My Project\ContractGuard',
 
-    [switch]$BlockOnReview
+    [switch]$UseWorkingTree,
+
+    [switch]$BlockOnReview,
+
+    [switch]$SelfTest
 )
 
 $ErrorActionPreference = 'Stop'
@@ -44,6 +48,20 @@ if (-not (Test-Path -LiteralPath $guardCli)) {
     throw "AI behavior guard CLI not found: $guardCli"
 }
 
+$regressionSelfTestCli = Join-Path $ProjectRoot 'tools\selftest-ai-behavior-regressions.mjs'
+if ($SelfTest) {
+    if (-not (Test-Path -LiteralPath $regressionSelfTestCli)) {
+        throw "AI behavior regression self-test CLI not found: $regressionSelfTestCli"
+    }
+
+    & node $regressionSelfTestCli
+    $exitCode = $LASTEXITCODE
+    if ($exitCode -ne 0) {
+        throw "AI behavior diff gate self-test failed with exit code: $exitCode"
+    }
+    exit 0
+}
+
 $runtimeDir = Join-Path $ProjectRoot '.runtime\ai-behavior-guard'
 New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
 
@@ -71,28 +89,73 @@ foreach ($item in $Paths) {
 }
 $relativePaths = @($relativePaths | Select-Object -Unique)
 
-$nameOnlyArgs = @('diff', '--cached', '--name-only', '--diff-filter=ACMR')
-if ($relativePaths.Count -gt 0) {
-    $nameOnlyArgs += '--'
-    $nameOnlyArgs += $relativePaths
-}
-$changedFiles = @(& git -C $repoRoot @nameOnlyArgs)
-if ($LASTEXITCODE -ne 0) {
-    throw 'Failed to read staged changed files.'
-}
-$changedFiles = @($changedFiles | ForEach-Object { $_.Trim() } | Where-Object { $_ })
-if ($changedFiles.Count -eq 0) {
-    throw 'No staged changes available for diff gate review.'
-}
+if ($UseWorkingTree) {
+    $statusArgs = @('status', '--porcelain')
+    if ($relativePaths.Count -gt 0) {
+        $statusArgs += '--'
+        $statusArgs += $relativePaths
+    }
+    $statusOutput = @(& git -C $repoRoot @statusArgs)
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Failed to read working tree status.'
+    }
 
-$diffArgs = @('diff', '--cached', '--no-color')
-if ($relativePaths.Count -gt 0) {
-    $diffArgs += '--'
-    $diffArgs += $relativePaths
-}
-$diffText = & git -C $repoRoot @diffArgs
-if ($LASTEXITCODE -ne 0) {
-    throw 'Failed to read staged diff.'
+    $changedFiles = @(
+        $statusOutput |
+            ForEach-Object {
+                $line = $_.TrimEnd()
+                if ([string]::IsNullOrWhiteSpace($line) -or $line.Length -lt 4) {
+                    return $null
+                }
+
+                $pathText = $line.Substring(3).Trim()
+                if ($pathText -match ' -> ') {
+                    $pathText = ($pathText -split ' -> ')[-1].Trim()
+                }
+                return (Normalize-GitPath -Value $pathText)
+            } |
+            Where-Object { $_ } |
+            Select-Object -Unique
+    )
+
+    if ($changedFiles.Count -eq 0) {
+        Write-Output 'AI behavior diff gate skipped: no working tree changes.'
+        exit 0
+    }
+
+    $diffArgs = @('diff', 'HEAD', '--no-color')
+    if ($relativePaths.Count -gt 0) {
+        $diffArgs += '--'
+        $diffArgs += $relativePaths
+    }
+    $diffText = & git -C $repoRoot @diffArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Failed to read working tree diff.'
+    }
+} else {
+    $nameOnlyArgs = @('diff', '--cached', '--name-only', '--diff-filter=ACMR')
+    if ($relativePaths.Count -gt 0) {
+        $nameOnlyArgs += '--'
+        $nameOnlyArgs += $relativePaths
+    }
+    $changedFiles = @(& git -C $repoRoot @nameOnlyArgs)
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Failed to read staged changed files.'
+    }
+    $changedFiles = @($changedFiles | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    if ($changedFiles.Count -eq 0) {
+        throw 'No staged changes available for diff gate review.'
+    }
+
+    $diffArgs = @('diff', '--cached', '--no-color')
+    if ($relativePaths.Count -gt 0) {
+        $diffArgs += '--'
+        $diffArgs += $relativePaths
+    }
+    $diffText = & git -C $repoRoot @diffArgs
+    if ($LASTEXITCODE -ne 0) {
+        throw 'Failed to read staged diff.'
+    }
 }
 
 Set-Content -LiteralPath $changedFilesFile -Value $changedFiles -Encoding utf8

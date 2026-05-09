@@ -1,0 +1,42 @@
+{
+  "id": "demo-sequential",
+  "goal": "compile and execute a minimal sequential graph",
+  "modeHint": "deterministic",
+  "modeReason": "single-path demo task",
+  "constraints": ["no-fallback", "explicit-trace"],
+  "steps": [
+    {
+      "id": "inspect-input",
+      "goal": "inspect input contract",
+      "action": {
+        "type": "inspect",
+        "spec": {
+          "value": "task payload accepted"
+        }
+      }
+    },
+    {
+      "id": "transform-input",
+      "goal": "transform validated input",
+      "action": {
+        "type": "transform",
+        "spec": {
+          "value": {
+            "normalized": true,
+            "source": "demo"
+          }
+        }
+      }
+    },
+    {
+      "id": "final-report",
+      "goal": "emit final execution report",
+      "action": {
+        "type": "llm",
+        "spec": {
+          "prompt": "sequential graph finished"
+        }
+      }
+    }
+  ]
+}

@@ -1,0 +1,185 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://atramenti.local/schemas/frontend-design-closeout.schema.json",
+  "title": "Frontend Design Closeout Gate Input",
+  "type": "object",
+  "additionalProperties": true,
+  "required": [
+    "taskIsNonTrivial",
+    "taskType",
+    "contract",
+    "componentSourceGate",
+    "visualRegressionGate"
+  ],
+  "properties": {
+    "taskIsNonTrivial": {
+      "type": "boolean",
+      "const": true
+    },
+    "taskType": {
+      "type": "string",
+      "enum": [
+        "frontend-redesign",
+        "frontend-refactor",
+        "console-redesign",
+        "ui-refresh"
+      ]
+    },
+    "contract": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "layout",
+        "components",
+        "spacings",
+        "copy"
+      ],
+      "properties": {
+        "path": {
+          "type": "string",
+          "minLength": 1
+        },
+        "layout": {
+          "type": "string",
+          "minLength": 8
+        },
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "spacings": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "copy": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    },
+    "componentSourceGate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "allowedSources",
+        "checkedFiles",
+        "violations"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "allowedSources": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "checkedFiles": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "violations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "visualRegressionGate": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": [
+        "status",
+        "tool",
+        "baseline",
+        "report"
+      ],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "fail"
+          ]
+        },
+        "tool": {
+          "type": "string",
+          "minLength": 1
+        },
+        "baseline": {
+          "type": "string",
+          "minLength": 1
+        },
+        "report": {
+          "type": "string",
+          "minLength": 1
+        },
+        "diffSummary": {
+          "type": "string"
+        }
+      }
+    },
+    "lintGate": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "pass",
+            "warn",
+            "fail",
+            "not-run"
+          ]
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "findings": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "report": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contractguard/unified-gates/kernel/contracts/trace-event.schema.json",
+  "title": "Trace Event Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["timestamp", "graphId", "decision"],
+  "properties": {
+    "timestamp": { "type": "string", "minLength": 1 },
+    "graphId": { "type": "string", "minLength": 1 },
+    "decision": {
+      "type": "string",
+      "minLength": 1,
+      "enum": ["initialize", "selected", "rejected", "schedule-batch", "committed", "commit", "blocked"]
+    },
+    "readyCount": { "type": "integer", "minimum": 0 },
+    "nodeId": { "type": "string", "minLength": 1 },
+    "status": { "type": "string", "enum": ["pending", "running", "done", "failed", "blocked"] },
+    "reasonCode": { "type": "string", "minLength": 1 },
+    "reason": { "type": "string", "minLength": 1 }
+  }
+}

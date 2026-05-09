@@ -1,0 +1,46 @@
+{
+  "taskIsNonTrivial": true,
+  "taskType": "ui-refresh",
+  "contract": {
+    "path": "ui-contracts/settings.md",
+    "layout": "Single-column settings form with sticky action bar and compact section grouping.",
+    "components": [
+      "SettingsSection",
+      "PrimaryButton"
+    ],
+    "spacings": [
+      "Use spacing tokens 8, 16, 24."
+    ],
+    "copy": [
+      "Primary CTA is Save Settings.",
+      "Error state tells the user to retry."
+    ]
+  },
+  "componentSourceGate": {
+    "status": "pass",
+    "allowedSources": [
+      "src/components/ui"
+    ],
+    "checkedFiles": [
+      "src/pages/settings.tsx"
+    ],
+    "violations": [],
+    "report": "artifacts/component-source-report.json"
+  },
+  "visualRegressionGate": {
+    "status": "pass",
+    "tool": "chromatic",
+    "baseline": "storybook-build-182",
+    "report": "https://example.test/chromatic/build/182"
+  },
+  "lintGate": {
+    "status": "warn",
+    "rules": [
+      "token-spacing"
+    ],
+    "findings": [
+      "src/pages/settings.tsx still uses one inline padding override"
+    ],
+    "report": "artifacts/lint-report.txt"
+  }
+}

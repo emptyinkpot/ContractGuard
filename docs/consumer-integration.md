@@ -75,3 +75,25 @@ Current integrated paths:
 Upstream source:
 
 - `E:\My Project\ContractGuard`
+
+
+## Frontend UI Contract Lite Integration
+
+For consumer repos that ship UI, adopt the minimal frontend stack in this order:
+
+1. copy `templates/project-contract/frontend-ui-contract.template.md` into a repo-local
+   `ui-contracts/` directory
+2. keep one short contract file per page or major surface
+3. wire CI to emit a closeout JSON that matches
+   `templates/project-contract/frontend-design-closeout.schema.json`
+4. run `guards/ai-behavior/core/check-frontend-design-closeout.mjs`
+   against that closeout JSON
+
+Recommended hard gates:
+
+- component sources must come from approved UI/component roots
+- visual regression must pass before merge
+
+Optional light gate:
+
+- lint report for spacing tokens, typography presets, and inline-style bans

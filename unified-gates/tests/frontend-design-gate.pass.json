@@ -1,0 +1,69 @@
+{
+  "taskIsNonTrivial": true,
+  "taskType": "console-redesign",
+  "userRules": [
+    "必须参考成熟开源或真实产品的设计语言",
+    "禁止主布局继续方框叠方框",
+    "必须同时给出桌面端和移动端验收截图"
+  ],
+  "referenceSet": [
+    {
+      "kind": "open-source",
+      "name": "Grafana",
+      "why": "借用高密度运维信号编排和行动优先级层次"
+    },
+    {
+      "kind": "product",
+      "name": "Linear",
+      "why": "借用精简但强对比的动作区和证据区分层"
+    }
+  ],
+  "visualDirection": {
+    "theme": "报站式运维控制台，强调信号带、动作台和证据侧栏的分区",
+    "typeStrategy": "标题用窄体高对比字重，表格和数字区用稳定等宽节奏提高扫读效率",
+    "colorStrategy": "暖灰底配琥珀和蓝绿状态色，用色块而不是卡片边框建立层次",
+    "antiPatternsToAvoid": [
+      "template dashboard",
+      "card-on-card nesting",
+      "boxed dashboard"
+    ]
+  },
+  "informationArchitecture": {
+    "desktopPriority": [
+      "fleet health strip",
+      "primary actions dock",
+      "evidence rail"
+    ],
+    "mobilePriority": [
+      "primary actions dock",
+      "fleet health strip",
+      "collapsed evidence rail"
+    ],
+    "primaryActions": [
+      "rotate key",
+      "disable provider",
+      "open provider debug"
+    ],
+    "secondaryEvidence": [
+      "cost anomalies",
+      "recent request failures",
+      "health drift"
+    ]
+  },
+  "antiPatternCleanup": [
+    {
+      "pattern": "card-on-card",
+      "status": "removed",
+      "note": "主屏改为带状分区和表格编排，不再用 summary card 套 panel"
+    },
+    {
+      "pattern": "mobile passive stacking",
+      "status": "reduced",
+      "note": "移动端把一级动作提升到顶部 dock，而不是简单单栏堆叠"
+    }
+  ],
+  "artifacts": {
+    "desktopScreenshot": "C:\\Users\\ASUS-KL\\.codex-runtime\\token-pool-console-desktop.png",
+    "mobileScreenshot": "C:\\Users\\ASUS-KL\\.codex-runtime\\token-pool-console-mobile.png"
+  }
+}

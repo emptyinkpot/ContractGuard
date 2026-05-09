@@ -31,6 +31,11 @@
   "governancePatterns": [
     "project-contract",
     "ai-behavior-gate",
-    "task-compiler-safe-execution"
-  ]
+    "task-compiler-safe-execution",
+    "frontend-ui-contract-lite",
+    "frontend-design-closeout-gate"
+  ],
+  "frontendContractTemplate": "templates/project-contract/frontend-ui-contract.template.md",
+  "frontendDesignCloseoutSchema": "templates/project-contract/frontend-design-closeout.schema.json",
+  "frontendDesignGateCli": "guards/ai-behavior/core/check-frontend-design-closeout.mjs"
 }

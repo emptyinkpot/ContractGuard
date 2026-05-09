@@ -1,0 +1,26 @@
+{
+  "taskIsNonTrivial": true,
+  "taskType": "frontend-refactor",
+  "contract": {
+    "path": "ui-contracts/broken.md",
+    "layout": "Too vague",
+    "components": [],
+    "spacings": [],
+    "copy": []
+  },
+  "componentSourceGate": {
+    "status": "fail",
+    "allowedSources": [],
+    "checkedFiles": [],
+    "violations": [
+      "src/pages/dashboard.tsx imports ad-hoc Button from local temp folder"
+    ],
+    "report": ""
+  },
+  "visualRegressionGate": {
+    "status": "fail",
+    "tool": "playwright",
+    "baseline": "",
+    "report": ""
+  }
+}

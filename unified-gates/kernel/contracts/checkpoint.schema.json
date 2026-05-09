@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contractguard/unified-gates/kernel/contracts/checkpoint.schema.json",
+  "title": "Checkpoint Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "graphId", "checkpointId", "createdAt", "pathLock", "state", "nodes", "edges"],
+  "properties": {
+    "schemaVersion": { "type": "string", "const": "1.0.0" },
+    "graphId": { "type": "string", "minLength": 1 },
+    "checkpointId": { "type": "string", "minLength": 1 },
+    "createdAt": { "type": "string", "minLength": 1 },
+    "traceCursor": { "type": ["string", "null"] },
+    "mode": { "type": ["string", "null"], "enum": ["deterministic", "probabilistic", "resilience", null] },
+    "constraints": { "type": "object" },
+    "pathLock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategyId", "locked", "pathMode", "retryPolicy", "maxRetries", "fallbackPolicy", "compatibilityPolicy", "hotfixPolicy"],
+      "properties": {
+        "strategyId": { "type": "string", "minLength": 1 },
+        "locked": { "type": "boolean", "const": true },
+        "pathMode": { "type": "string", "enum": ["immutable"] },
+        "retryPolicy": { "type": "string", "enum": ["same-path-only"] },
+        "maxRetries": { "type": "integer", "minimum": 0 },
+        "fallbackPolicy": { "type": "string", "enum": ["disabled"] },
+        "compatibilityPolicy": { "type": "string", "enum": ["disabled"] },
+        "hotfixPolicy": { "type": "string", "enum": ["disabled"] }
+      }
+    },
+    "state": { "type": ["string", "null"] },
+    "objective": { "type": ["string", "null"] },
+    "nodes": {
+      "type": "array",
+      "items": { "type": "object" }
+    },
+    "edges": {
+      "type": "array",
+      "items": { "type": "object" }
+    }
+  }
+}

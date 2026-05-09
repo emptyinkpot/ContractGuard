@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
+import { buildDecisionResult } from "../../shared/decision-result.mjs";
 
 function parseArgs(argv) {
   const args = {
@@ -9,6 +10,7 @@ function parseArgs(argv) {
     policyPath: null,
     docs: [],
     inputFiles: [],
+    responseFile: null,
     planFile: null,
     diffFile: null,
     commandsFile: null,
@@ -43,6 +45,10 @@ function parseArgs(argv) {
         break;
       case "--input":
         args.inputFiles.push(nextValue(token, index));
+        index += 1;
+        break;
+      case "--response-file":
+        args.responseFile = nextValue(token, index);
         index += 1;
         break;
       case "--plan-file":
@@ -111,6 +117,137 @@ function parseListText(text) {
     .filter((line) => line && !line.startsWith("#"));
 }
 
+const RESPONSE_FORMAT_MARKERS = ["STEP", "WHY", "ACTION", "RESULT"];
+
+function validateResponseFormat(text, sourceLabel) {
+  const lines = text.split(/\r?\n/);
+  const contentCounts = new Map(RESPONSE_FORMAT_MARKERS.map((marker) => [marker, 0]));
+  const seenMarkers = new Set();
+  let expectedIndex = 0;
+  let currentMarker = null;
+  let sawMarker = false;
+
+  for (const rawLine of lines) {
+    const trimmedLine = rawLine.trim();
+    if (trimmedLine.length === 0) {
+      continue;
+    }
+
+    const match = trimmedLine.match(/^\[(STEP|WHY|ACTION|RESULT)\]\s*(.*)$/i);
+    if (match) {
+      const marker = match[1].toUpperCase();
+      const markerIndex = RESPONSE_FORMAT_MARKERS.indexOf(marker);
+      if (markerIndex !== expectedIndex) {
+        return {
+          ok: false,
+          reason: `expected [${RESPONSE_FORMAT_MARKERS[expectedIndex]}] but found [${marker}]`,
+          evidence: [`${sourceLabel}: ${trimmedLine}`],
+        };
+      }
+
+      if (seenMarkers.has(marker)) {
+        return {
+          ok: false,
+          reason: `duplicate [${marker}] section`,
+          evidence: [`${sourceLabel}: ${trimmedLine}`],
+        };
+      }
+
+      seenMarkers.add(marker);
+      currentMarker = marker;
+      sawMarker = true;
+      expectedIndex += 1;
+
+      if (match[2].trim().length > 0) {
+        contentCounts.set(marker, contentCounts.get(marker) + 1);
+      }
+
+      continue;
+    }
+
+    if (!sawMarker) {
+      return {
+        ok: false,
+        reason: "content appears before [STEP]",
+        evidence: [`${sourceLabel}: ${trimmedLine}`],
+      };
+    }
+
+    if (currentMarker === null) {
+      return {
+        ok: false,
+        reason: "content appears outside the required sections",
+        evidence: [`${sourceLabel}: ${trimmedLine}`],
+      };
+    }
+
+    contentCounts.set(currentMarker, contentCounts.get(currentMarker) + 1);
+  }
+
+  for (const marker of RESPONSE_FORMAT_MARKERS) {
+    if (!seenMarkers.has(marker)) {
+      return {
+        ok: false,
+        reason: `missing [${marker}] section`,
+        evidence: [`${sourceLabel}: [${marker}]`],
+      };
+    }
+  }
+
+  for (const marker of RESPONSE_FORMAT_MARKERS) {
+    if ((contentCounts.get(marker) ?? 0) === 0) {
+      return {
+        ok: false,
+        reason: `[${marker}] section is empty`,
+        evidence: [`${sourceLabel}: [${marker}]`],
+      };
+    }
+  }
+
+  return {
+    ok: true,
+    reason: "response format is valid",
+    evidence: [],
+  };
+}
+
+function evaluateResponseFormat(responseEntries) {
+  if (!Array.isArray(responseEntries) || responseEntries.length === 0) {
+    return {
+      checked: false,
+      ok: true,
+      findings: [],
+    };
+  }
+
+  const findings = [];
+  let ok = true;
+
+  for (const entry of responseEntries) {
+    const validation = validateResponseFormat(entry.text, entry.path ?? entry.label ?? "response");
+    if (validation.ok) {
+      continue;
+    }
+
+    ok = false;
+    findings.push({
+      id: "invalid_progress_format",
+      category: "format",
+      severity: "critical",
+      penalty: 60,
+      message: `响应必须按 [STEP]/[WHY]/[ACTION]/[RESULT] 顺序输出：${validation.reason}`,
+      evidence: validation.evidence,
+      source: entry.path ?? entry.label ?? "response",
+    });
+  }
+
+  return {
+    checked: true,
+    ok,
+    findings,
+  };
+}
+
 function collectDocCandidates(repoRoot, policy, explicitDocs) {
   const resolved = [];
   for (const item of [...policy.defaultDocCandidates, ...explicitDocs]) {
@@ -135,6 +272,7 @@ function collectInputs(repoRoot, args) {
       .split(";")
       .map((item) => item.trim())
       .filter(Boolean);
+  const responseFile = args.responseFile || process.env.OUTPUT_GUARD_RESPONSE_FILE || null;
   const planFile = args.planFile || process.env.OUTPUT_GUARD_PLAN_FILE || null;
   const diffFile = args.diffFile || process.env.OUTPUT_GUARD_DIFF_FILE || null;
   const commandsFile = args.commandsFile || process.env.OUTPUT_GUARD_COMMANDS_FILE || null;
@@ -162,6 +300,7 @@ function collectInputs(repoRoot, args) {
     pushEntry("input", item);
   }
 
+  pushEntry("response", responseFile);
   pushEntry("plan", planFile);
   pushEntry("diff", diffFile);
   pushEntry("commands", commandsFile);
@@ -278,15 +417,36 @@ function compilePolicy(policy) {
       regex: new RegExp(rule.pattern, "i"),
     })),
     boundaryFilePatterns: policy.boundaryFilePatterns.map((value) => value.toLowerCase()),
+    documentationFilePatterns: (policy.documentationFilePatterns || []).map((value) => value.toLowerCase()),
+    documentationExampleLinePatterns: (policy.documentationExampleLinePatterns || []).map(
+      (pattern) => new RegExp(pattern, "i"),
+    ),
   };
 }
 
-function evidenceForPattern(text, regex) {
+function isDocumentationFile(filePath, compiledPolicy) {
+  const normalized = normalizeSlashes(filePath).toLowerCase();
+  return compiledPolicy.documentationFilePatterns.some((pattern) => normalized.includes(pattern));
+}
+
+function isDocumentationExampleLine(line, facts, compiledPolicy) {
+  if (!facts.hasDocumentationChanges) {
+    return false;
+  }
+
+  const trimmed = line.trim();
+  return compiledPolicy.documentationExampleLinePatterns.some((regex) => regex.test(trimmed));
+}
+
+function evidenceForPattern(text, regex, facts, compiledPolicy) {
   const lines = text.split(/\r?\n/);
   const evidence = [];
 
   for (const line of lines) {
     if (regex.test(line)) {
+      if (isDocumentationExampleLine(line, facts, compiledPolicy)) {
+        continue;
+      }
       evidence.push(line.trim());
       if (evidence.length >= 3) {
         break;
@@ -303,7 +463,11 @@ function summarizeFacts(inputEntries, compiledPolicy, rules) {
     .join("\n\n");
   const changedFilesEntry = inputEntries.find((entry) => entry.label === "changed_files");
   const changedFiles = changedFilesEntry ? parseListText(changedFilesEntry.text) : [];
+  const responseEntries = inputEntries.filter((entry) => entry.label === "response");
   const normalizedFiles = changedFiles.map((item) => normalizeSlashes(item).toLowerCase());
+  const hasDocumentationChanges = normalizedFiles.some((item) => isDocumentationFile(item, compiledPolicy));
+  const docsOnlyChanges = normalizedFiles.length > 0
+    && normalizedFiles.every((item) => isDocumentationFile(item, compiledPolicy));
   const touchesBoundaryFiles = normalizedFiles.some((item) =>
     compiledPolicy.boundaryFilePatterns.some((pattern) => item.includes(pattern)),
   );
@@ -315,6 +479,9 @@ function summarizeFacts(inputEntries, compiledPolicy, rules) {
   return {
     combinedText,
     changedFiles,
+    hasDocumentationChanges,
+    docsOnlyChanges,
+    hasResponseInput: responseEntries.length > 0,
     touchesBoundary: touchesBoundaryFiles || touchesBoundaryText,
     verificationSignals,
     hasAnyInput: combinedText.trim().length > 0,
@@ -357,7 +524,7 @@ function evaluateBehavior(inputEntries, compiledPolicy, rules) {
 
   let hardBlockMatched = false;
   for (const rule of compiledPolicy.hardBlockRules) {
-    const evidence = evidenceForPattern(facts.combinedText, rule.regex);
+    const evidence = evidenceForPattern(facts.combinedText, rule.regex, facts, compiledPolicy);
     if (evidence.length === 0) {
       continue;
     }
@@ -366,8 +533,18 @@ function evaluateBehavior(inputEntries, compiledPolicy, rules) {
     hardBlockMatched = true;
   }
 
+  const responseEntries = inputEntries.filter((entry) => entry.label === "response");
+  const responseFormatEvaluation = evaluateResponseFormat(responseEntries);
+  if (responseFormatEvaluation.checked && !responseFormatEvaluation.ok) {
+    for (const finding of responseFormatEvaluation.findings) {
+      findings.push(finding);
+    }
+    hardBlockMatched = true;
+    score -= 60;
+  }
+
   for (const rule of compiledPolicy.rules) {
-    const evidence = evidenceForPattern(facts.combinedText, rule.regex);
+    const evidence = evidenceForPattern(facts.combinedText, rule.regex, facts, compiledPolicy);
     if (evidence.length === 0) {
       continue;
     }
@@ -378,9 +555,11 @@ function evaluateBehavior(inputEntries, compiledPolicy, rules) {
 
   const baseUrlRegex = /\bbase_url\b|\bbaseUrl\b|https?:\/\/[^\s`"'<>]+/i;
   const mentionedUrls = unique(
-    [...facts.combinedText.matchAll(/https?:\/\/[^\s`"'<>]+/g)].map((match) =>
-      match[0].replace(/[),.;]+$/, ""),
-    ),
+    facts.combinedText
+      .split(/\r?\n/)
+      .filter((line) => !isDocumentationExampleLine(line, facts, compiledPolicy))
+      .flatMap((line) => [...line.matchAll(/https?:\/\/[^\s`"'<>]+/g)].map((match) =>
+        match[0].replace(/[),.;]+$/, ""))),
   );
   if (baseUrlRegex.test(facts.combinedText) && rules.canonicalBaseUrls.length > 0) {
     const nonCanonicalUrls = mentionedUrls.filter((item) => !rules.canonicalBaseUrls.includes(item));
@@ -398,7 +577,7 @@ function evaluateBehavior(inputEntries, compiledPolicy, rules) {
     }
   }
 
-  if (facts.touchesBoundary && facts.verificationSignals.length === 0) {
+  if (facts.touchesBoundary && facts.verificationSignals.length === 0 && !facts.docsOnlyChanges) {
     findings.push({
       id: "missing_required_checks",
       category: "observability",
@@ -427,38 +606,53 @@ function evaluateBehavior(inputEntries, compiledPolicy, rules) {
     findings,
     facts,
     hardBlockMatched,
+    responseFormatEvaluation,
   };
 }
 
 function buildResult(args, policy, docSources, inputEntries, evaluation) {
-  return {
-    mcp: "output-guard",
+  return buildDecisionResult({
+    gateId: "GATE-AI-BEHAVIOR-001",
     tool: "ai-behavior-gate",
-    status: evaluation.verdict === "block" ? "failed" : "ok",
-    repoRoot: args.repoRoot,
-    score: evaluation.score,
     verdict: evaluation.verdict,
-    findings: evaluation.findings,
-    facts: {
-      touchesBoundary: evaluation.facts.touchesBoundary,
-      verificationSignals: evaluation.facts.verificationSignals,
-      changedFiles: evaluation.facts.changedFiles,
-      hardBlockMatched: evaluation.hardBlockMatched,
+    reason: evaluation.findings[0]?.message ?? "ai behavior policy evaluation completed",
+    status: evaluation.verdict === "block" ? "failed" : "ok",
+    violations: evaluation.findings.map((finding) => ({
+      code: finding.id,
+      severity: finding.severity,
+      detail: finding.message,
+      evidence: finding.evidence,
+      source: finding.source,
+      category: finding.category,
+    })),
+    extra: {
+      mcp: "output-guard",
+      repoRoot: args.repoRoot,
+      score: evaluation.score,
+      findings: evaluation.findings,
+      facts: {
+        touchesBoundary: evaluation.facts.touchesBoundary,
+        verificationSignals: evaluation.facts.verificationSignals,
+        changedFiles: evaluation.facts.changedFiles,
+        hasResponseInput: evaluation.facts.hasResponseInput,
+        hardBlockMatched: evaluation.hardBlockMatched,
+        responseFormatChecked: evaluation.responseFormatEvaluation?.checked ?? false,
+        responseFormatValid: evaluation.responseFormatEvaluation?.ok ?? true,
+      },
+      sources: {
+        docs: docSources.map((source) => source.path),
+        inputs: inputEntries.map((entry) => ({
+          label: entry.label,
+          path: entry.path,
+        })),
+      },
+      policySummary: {
+        docCandidates: policy.defaultDocCandidates,
+        requiredCheckPatterns: policy.requiredCheckPatterns,
+        hardBlockRuleIds: policy.hardBlockRules.map((rule) => rule.id),
+      },
     },
-    sources: {
-      docs: docSources.map((source) => source.path),
-      inputs: inputEntries.map((entry) => ({
-        label: entry.label,
-        path: entry.path,
-      })),
-    },
-    policySummary: {
-      docCandidates: policy.defaultDocCandidates,
-      requiredCheckPatterns: policy.requiredCheckPatterns,
-      hardBlockRuleIds: policy.hardBlockRules.map((rule) => rule.id),
-    },
-    timestampUtc: new Date().toISOString(),
-  };
+  });
 }
 
 function writeJsonIfRequested(filePath, value) {
@@ -482,29 +676,63 @@ function runSelfTest(policy) {
     },
   ];
   const rules = buildRules(docs, policy);
-  const riskyInput = [
+  const riskyDiffInput = [
     {
-      label: "plan",
-      path: "SELFTEST:plan.txt",
+      label: "diff",
+      path: "SELFTEST:risky.diff",
       text: [
-        "Change base_url to http://127.0.0.1:3001/openai/v1",
-        "Bypass pool and call direct provider",
+        "diff --git a/src/gateway.js b/src/gateway.js",
+        "index 0000000..1111111 100644",
+        "--- a/src/gateway.js",
+        "+++ b/src/gateway.js",
+        "@@ -1,0 +1,2 @@",
+        "+const base_url = \"http://127.0.0.1:3001/openai/v1\";",
+        "+// bypass pool with direct provider",
       ].join("\n"),
     },
   ];
-  const safeInput = [
+  const safeDiffInput = [
     {
-      label: "plan",
-      path: "SELFTEST:safe-plan.txt",
+      label: "diff",
+      path: "SELFTEST:safe.diff",
       text: [
-        "Repair canonical gateway route",
-        "Verify /health and /v1/models before closeout",
+        "diff --git a/docs/quickstart.md b/docs/quickstart.md",
+        "index 0000000..1111111 100644",
+        "--- a/docs/quickstart.md",
+        "+++ b/docs/quickstart.md",
+        "@@ -72,0 +73,4 @@",
+        "+```powershell",
+        "+powershell -File guards/ai-behavior/hooks/invoke-plan-gate.ps1 -ProjectRoot . -Query \"Repair canonical route and verify /health before closeout\"",
+        "+```",
+      ].join("\n"),
+    },
+  ];
+  const riskyResponseInput = [
+    {
+      label: "response",
+      path: "SELFTEST:response.txt",
+      text: [
+        "This response skips the required format and should be blocked.",
+      ].join("\n"),
+    },
+  ];
+  const safeResponseInput = [
+    {
+      label: "response",
+      path: "SELFTEST:safe-response.txt",
+      text: [
+        "[STEP] Review the current gate wiring.",
+        "[WHY] We need to make the format rule executable.",
+        "[ACTION] Add a response-format validator and bind it to the output guard.",
+        "[RESULT] The guard now blocks missing STEP/WHY/ACTION/RESULT outputs.",
       ].join("\n"),
     },
   ];
   const compiledPolicy = compilePolicy(policy);
-  const risky = evaluateBehavior(riskyInput, compiledPolicy, rules);
-  const safe = evaluateBehavior(safeInput, compiledPolicy, rules);
+  const risky = evaluateBehavior(riskyDiffInput, compiledPolicy, rules);
+  const safe = evaluateBehavior(safeDiffInput, compiledPolicy, rules);
+  const riskyResponse = evaluateBehavior(riskyResponseInput, compiledPolicy, rules);
+  const safeResponse = evaluateBehavior(safeResponseInput, compiledPolicy, rules);
 
   if (risky.verdict !== "block") {
     throw new Error("Self-test failed: risky input should block.");
@@ -514,15 +742,30 @@ function runSelfTest(policy) {
     throw new Error("Self-test failed: safe input should not block.");
   }
 
-  return {
-    mcp: "output-guard",
+  if (riskyResponse.verdict !== "block") {
+    throw new Error("Self-test failed: risky response should block.");
+  }
+
+  if (safeResponse.verdict === "block") {
+    throw new Error("Self-test failed: safe response should not block.");
+  }
+
+  return buildDecisionResult({
+    gateId: "GATE-AI-BEHAVIOR-001",
     tool: "ai-behavior-gate",
+    verdict: "allow",
+    reason: "self-test passed",
     status: "ok",
-    selfTest: true,
-    riskyVerdict: risky.verdict,
-    safeVerdict: safe.verdict,
-    timestampUtc: new Date().toISOString(),
-  };
+    violations: [],
+    extra: {
+      mcp: "output-guard",
+      selfTest: true,
+      riskyVerdict: risky.verdict,
+      safeVerdict: safe.verdict,
+      riskyResponseVerdict: riskyResponse.verdict,
+      safeResponseVerdict: safeResponse.verdict,
+    },
+  });
 }
 
 function main() {

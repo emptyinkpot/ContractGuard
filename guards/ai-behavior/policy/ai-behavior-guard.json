@@ -17,6 +17,22 @@
     "pool",
     "entry"
   ],
+  "documentationFilePatterns": [
+    ".md",
+    "docs/",
+    "readme",
+    "quickstart"
+  ],
+  "documentationExampleLinePatterns": [
+    "^```",
+    "^powershell\\b",
+    "^node\\b",
+    "invoke-plan-gate\\.ps1",
+    "invoke-diff-gate\\.ps1",
+    "--self-test",
+    "-query\\s+\"",
+    "example repo"
+  ],
   "requiredCheckPatterns": [
     "/health",
     "/debug",
@@ -86,5 +102,66 @@
       "pattern": "\\b(bypass\\s+(the\\s+)?(pool|gateway)|direct\\s+provider|绕过\\s*(pool|gateway)|直连\\s*provider)\\b",
       "message": "检测到绕过 canonical pool/gateway 或直连 provider。"
     }
-  ]
+  ],
+  "dualAgentSyncRules": {
+    "enabled": true,
+    "mode": "auto-sync",
+    "description": "Codex 和 Claude 双智能体自动同步规则 - 一个修改另一个自动同步",
+    "syncTargets": [
+      {
+        "codex": "C:\\Users\\ASUS-KL\\.codex\\AGENTS.md",
+        "claude": "C:\\Users\\ASUS-KL\\CLAUDE.md",
+        "type": "global-rules",
+        "syncRequired": true
+      },
+      {
+        "codex": "C:\\Users\\ASUS-KL\\.codex\\MEMORY.md",
+        "claude": "C:\\Users\\ASUS-KL\\.claude\\projects\\C--Users-ASUS-KL\\memory",
+        "type": "shared-memory",
+        "syncRequired": true
+      },
+      {
+        "shared": "E:\\My Project\\ContractGuard\\guards\\ai-behavior\\policy\\ai-behavior-guard.json",
+        "type": "gate-policy",
+        "syncRequired": true,
+        "note": "本文件是共享门禁策略，任何变更都影响两个智能体"
+      }
+    ],
+    "syncProtocol": {
+      "onRuleChange": "必须在同一任务中同步更新 Codex 和 Claude 的规则文件",
+      "onCapabilityAdd": "评估新能力对两个智能体的适用性，更新能力注册表",
+      "onToolAdd": "确定工具的适用智能体（codex/claude/both），同步配置",
+      "onMemoryUpdate": "更新共享内存层，保持知识格式一致性",
+      "verification": "使用 C:\\Users\\ASUS-KL\\.codex\\orchestrator\\sync-agents.ps1 验证同步状态"
+    },
+    "autoSyncTriggers": [
+      {
+        "type": "rule_file_change",
+        "action": "auto-sync",
+        "description": "检测到规则文件变更，自动同步到另一个智能体"
+      },
+      {
+        "type": "capability_add",
+        "action": "auto-sync",
+        "description": "检测到能力新增，自动更新两个智能体的注册表"
+      },
+      {
+        "type": "memory_update",
+        "action": "auto-sync",
+        "description": "检测到内存更新，自动同步到共享内存层"
+      },
+      {
+        "type": "gate_policy_change",
+        "action": "auto-sync",
+        "description": "检测到门禁策略变更，自动通知两个智能体重新加载"
+      }
+    ],
+    "syncBehavior": {
+      "onCodexChange": "自动同步到 Claude",
+      "onClaudeChange": "自动同步到 Codex",
+      "conflictResolution": "merge-with-notification",
+      "backupBeforeSync": true,
+      "verifyAfterSync": true
+    }
+  }
 }

@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contractguard/unified-gates/kernel/contracts/execution-state.schema.json",
+  "title": "Execution State Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["graphId", "state", "cursor"],
+  "properties": {
+    "graphId": { "type": "string", "minLength": 1 },
+    "state": { "type": "string", "enum": ["INIT", "CLASSIFIED", "PLANNED", "SCHEDULED", "RUNNING", "VALIDATING", "DONE", "FAILED", "BLOCKED"] },
+    "cursor": { "type": "string", "minLength": 1 }
+  }
+}

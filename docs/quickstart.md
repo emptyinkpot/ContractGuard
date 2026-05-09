@@ -72,7 +72,63 @@ powershell -File guards/ai-behavior/hooks/invoke-plan-gate.ps1 -ProjectRoot . -Q
 ```
 
 ```powershell
-powershell -File guards/ai-behavior/hooks/invoke-plan-gate.ps1 -ProjectRoot . -Query "Change base_url to http://127.0.0.1:3001/openai/v1 and bypass pool with direct provider"
+powershell -File guards/ai-behavior/hooks/invoke-plan-gate.ps1 -ProjectRoot . -Query "Change base_url to http://127.0.0.1:3001/openai/v1 and replace the canonical gateway with a direct provider path"
+```
+
+For diff-gate validation against local unstaged changes:
+
+```powershell
+powershell -File guards/ai-behavior/hooks/invoke-diff-gate.ps1 -RepoPath . -ProjectRoot . -UseWorkingTree
+```
+
+### Step 6. Try the local task pipeline
+
+Run:
+
+```powershell
+node tools/task-pipeline/run-task-pipeline.mjs --self-test
+```
+
+Or pass a goal directly:
+
+```powershell
+node tools/task-pipeline/run-task-pipeline.mjs --goal "Design a safe local SDK integration plan for a consumer repo"
+```
+
+Or provide an explicit policy file:
+
+```powershell
+node tools/task-pipeline/run-task-pipeline.mjs --policy tools/task-pipeline/policy/task-pipeline-policy.json --goal "Design a safe local SDK integration plan for a consumer repo"
+```
+
+Expected result:
+
+- the goal is compiled into analysis, design, and codegen steps
+- the local plan gate can refine blocked steps into smaller executable units
+- the safety verifier marks controlled-local or handoff conditions before execution
+- the staged executor runs approved steps phase by phase and records stage-level trace
+- the diff gate reports execution drift and the trace auditor reports audit closure
+- the output contains `policyPath`, `compiledSteps`, `plannedSteps`, `planGate`, `safetyVerifier`, `steps`, `results`, `diffGate`, `auditLog`, and `trace`
+
+### Step 7. Preview unified-gates policy sync output
+
+Run:
+
+```powershell
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -Report
+```
+
+To validate the generated report structure:
+
+```powershell
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -ValidateReport -Report
+```
+
+To write audit-friendly local artifacts:
+
+```powershell
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -Report -OutFile C:\Users\ASUS-KL\.codex\.tmp\sync-report.json
+E:\My Project\ContractGuard\unified-gates\tools\run-sync-report.ps1 -ValidateReport -Report -OutFile C:\Users\ASUS-KL\.codex\.tmp\sync-validation.json
 ```
 
 ## Path B: Sync Mirror

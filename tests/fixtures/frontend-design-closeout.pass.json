@@ -1,0 +1,52 @@
+{
+  "taskIsNonTrivial": true,
+  "taskType": "console-redesign",
+  "contract": {
+    "path": "ui-contracts/project-list.md",
+    "layout": "Split console layout with sidebar, filter rail, and primary table region.",
+    "components": [
+      "DataTable",
+      "FilterDrawer",
+      "PrimaryButton"
+    ],
+    "spacings": [
+      "Use spacing tokens 8, 16, 24, 32 only.",
+      "No arbitrary pixel values in layout wrappers."
+    ],
+    "copy": [
+      "Primary CTA is Create Project.",
+      "Empty state invites the user to create the first project.",
+      "Error state tells the user to retry or contact support."
+    ]
+  },
+  "componentSourceGate": {
+    "status": "pass",
+    "allowedSources": [
+      "src/components/ui",
+      "src/components/console"
+    ],
+    "checkedFiles": [
+      "src/pages/projects.tsx",
+      "src/components/console/project-table.tsx"
+    ],
+    "violations": [],
+    "report": "artifacts/component-source-report.json"
+  },
+  "visualRegressionGate": {
+    "status": "pass",
+    "tool": "playwright",
+    "baseline": "artifacts/baselines/projects-page",
+    "report": "artifacts/playwright-snapshots/index.html",
+    "diffSummary": "desktop, tablet, and mobile snapshots all matched baseline"
+  },
+  "lintGate": {
+    "status": "pass",
+    "rules": [
+      "token-spacing",
+      "no-inline-style",
+      "typography-preset"
+    ],
+    "findings": [],
+    "report": "artifacts/lint-report.txt"
+  }
+}

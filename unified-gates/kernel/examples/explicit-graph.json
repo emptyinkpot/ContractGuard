@@ -1,0 +1,56 @@
+{
+  "id": "demo-explicit-graph",
+  "mode": "deterministic",
+  "objective": "validate explicit execution graph payload",
+  "state": "PLANNED",
+  "constraints": {},
+  "pathLock": {
+    "strategyId": "demo-explicit-graph",
+    "locked": true,
+    "pathMode": "immutable",
+    "retryPolicy": "same-path-only",
+    "maxRetries": 0,
+    "fallbackPolicy": "disabled",
+    "compatibilityPolicy": "disabled",
+    "hotfixPolicy": "disabled"
+  },
+  "nodes": [
+    {
+      "id": "inspect-contract",
+      "mode": "deterministic",
+      "goal": "inspect graph contract",
+      "inputs": {},
+      "outputs": {},
+      "action": {
+        "type": "inspect",
+        "spec": {
+          "value": "graph contract present"
+        }
+      },
+      "dependencies": [],
+      "status": "pending"
+    },
+    {
+      "id": "emit-report",
+      "mode": "deterministic",
+      "goal": "emit graph report",
+      "inputs": {},
+      "outputs": {},
+      "action": {
+        "type": "llm",
+        "spec": {
+          "prompt": "explicit graph finished"
+        }
+      },
+      "dependencies": [],
+      "status": "pending"
+    }
+  ],
+  "edges": [
+    {
+      "from": "inspect-contract",
+      "to": "emit-report",
+      "type": "control"
+    }
+  ]
+}

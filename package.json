@@ -7,7 +7,14 @@
   "scripts": {
     "validate:project": "node tools/validate-project-contract.mjs project.json",
     "selftest:guard": "node guards/ai-behavior/core/check-ai-behavior.mjs --repo-root . --self-test",
+    "selftest:guard-regressions": "node tools/selftest-ai-behavior-regressions.mjs",
+    "selftest:decision-schema": "node tests/test-decision-schema.mjs",
+    "gate:pre-commit": "node unified-gates/gates/pre-commit.mjs --repo-root . --mode local",
+    "gate:ci": "node unified-gates/gates/pre-commit.mjs --repo-root . --mode ci",
+    "selftest:pre-commit": "node unified-gates/gates/pre-commit.mjs --repo-root . --self-test",
+    "hooks:install": "node scripts/install-git-hooks.mjs",
     "run:task-pipeline": "node tools/task-pipeline/run-task-pipeline.mjs",
-    "selftest:task-pipeline": "node tools/task-pipeline/run-task-pipeline.mjs --self-test"
+    "selftest:task-pipeline": "node tools/task-pipeline/run-task-pipeline.mjs --self-test",
+    "selftest:frontend-design-closeout": "node tests/test-frontend-design-closeout-gate.mjs"
   }
 }

@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contractguard/unified-gates/kernel/contracts/execution-graph.schema.json",
+  "title": "Execution Graph Schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "mode", "pathLock", "nodes", "edges", "state"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "mode": { "type": "string", "enum": ["deterministic", "probabilistic", "resilience"] },
+    "constraints": { "type": "object" },
+    "pathLock": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategyId", "locked", "pathMode", "retryPolicy", "maxRetries", "fallbackPolicy", "compatibilityPolicy", "hotfixPolicy"],
+      "properties": {
+        "strategyId": { "type": "string", "minLength": 1 },
+        "locked": { "type": "boolean", "const": true },
+        "pathMode": { "type": "string", "enum": ["immutable"] },
+        "retryPolicy": { "type": "string", "enum": ["same-path-only"] },
+        "maxRetries": { "type": "integer", "minimum": 0 },
+        "fallbackPolicy": { "type": "string", "enum": ["disabled"] },
+        "compatibilityPolicy": { "type": "string", "enum": ["disabled"] },
+        "hotfixPolicy": { "type": "string", "enum": ["disabled"] }
+      }
+    },
+    "objective": { "type": ["string", "null"] },
+    "state": { "type": "string", "enum": ["INIT", "CLASSIFIED", "PLANNED", "SCHEDULED", "RUNNING", "VALIDATING", "DONE", "FAILED", "BLOCKED"] },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "mode", "goal", "inputs", "outputs", "action", "dependencies", "status"],
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "mode": { "type": "string", "enum": ["deterministic", "probabilistic", "resilience"] },
+          "goal": { "type": "string", "minLength": 1 },
+          "inputs": { "type": "object" },
+          "outputs": { "type": "object" },
+          "action": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["type", "spec"],
+            "properties": {
+              "type": { "type": "string", "enum": ["tool", "llm", "transform", "inspect"] },
+              "spec": {}
+            }
+          },
+          "dependencies": {
+            "type": "array",
+            "items": { "type": "string", "minLength": 1 }
+          },
+          "status": { "type": "string", "enum": ["pending", "running", "done", "failed", "blocked"] }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["from", "to", "type"],
+        "properties": {
+          "from": { "type": "string", "minLength": 1 },
+          "to": { "type": "string", "minLength": 1 },
+          "type": { "type": "string", "enum": ["data", "control", "causal"] }
+        }
+      }
+    }
+  }
+}

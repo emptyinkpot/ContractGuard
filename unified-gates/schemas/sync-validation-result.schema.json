@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "contractguard/unified-gates/schemas/sync-validation-result.schema.json",
+  "title": "Unified Gates Sync Validation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "ok",
+    "schemaVersion",
+    "mode",
+    "schemaPath",
+    "validationSchemaPath",
+    "reportMode",
+    "valid",
+    "validationErrors",
+    "pathExistenceValidation",
+    "policyArtifactValidation"
+  ],
+  "properties": {
+    "ok": {
+      "type": "boolean",
+      "const": true
+    },
+    "schemaVersion": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "mode": {
+      "type": "string",
+      "const": "validate-report"
+    },
+    "schemaPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validationSchemaPath": {
+      "type": "string",
+      "minLength": 1
+    },
+    "reportMode": {
+      "type": "string",
+      "enum": ["write", "dry-run", "report"]
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "validationErrors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "pathExistenceValidation": {
+      "$ref": "#/$defs/pathExistenceValidation"
+    },
+    "policyArtifactValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "gateRegistry",
+        "policyMap"
+      ],
+      "properties": {
+        "gateRegistry": {
+          "$ref": "#/$defs/validationResult"
+        },
+        "policyMap": {
+          "$ref": "#/$defs/validationResult"
+        }
+      }
+    }
+  },
+  "$defs": {
+    "pathExistenceValidation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "checkedTargets",
+        "missingTargets"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "checkedTargets": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "missingTargets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["kind", "source", "target"],
+            "properties": {
+              "kind": { "type": "string", "minLength": 1 },
+              "source": { "type": "string", "minLength": 1 },
+              "target": { "type": "string", "minLength": 1 }
+            }
+          }
+        }
+      }
+    },
+    "validationResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "ok",
+        "errors"
+      ],
+      "properties": {
+        "ok": {
+          "type": "boolean"
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        }
+      }
+    }
+  }
+}

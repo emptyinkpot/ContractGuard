@@ -7,6 +7,10 @@ repo-managed engineering repos under the Atramenti / Codex baseline.
 
 - `project.schema.json`
   - JSON Schema for repo-root `project.json`
+- `frontend-ui-contract.template.md`
+  - lightweight page-level UI contract template
+- `frontend-design-closeout.schema.json`
+  - JSON Schema for CI closeout evidence of component-source and visual-regression gates
 
 ## Purpose
 
@@ -17,6 +21,7 @@ consumed by:
 - repo-aware agents
 - local wrappers and automation
 - handbook generation and project bootstrapping
+- lightweight frontend UI contract and closeout gate adoption
 
 ## Expected Pairing
 
@@ -57,6 +62,13 @@ When a repo adopts this contract:
 3. make `executionGateway.mode` explicit when the repo participates in gateway
    plan/profile enforcement
 4. keep `project.json` and `README.md` aligned in the same change cycle
+
+For frontend work, the recommended minimal stack is:
+
+1. author a short page-level contract from `frontend-ui-contract.template.md`
+2. enforce legal component sources in CI
+3. enforce screenshot or visual-regression checks in CI
+4. optionally attach a lightweight lint report for token and typography drift
 
 ## Validation Hint
 
