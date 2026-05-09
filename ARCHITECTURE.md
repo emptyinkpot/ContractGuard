@@ -335,11 +335,13 @@ E:\My Project\ContractGuard\
       "sync_order": 1
     },
     {
-      "path": "E:\\My Project\\Mortis",
-      "role": "owning repo",
-      "owned_boundaries": ["Mortis / multica 主产品源码"],
-      "first_party_commits": "yes",
+      "path": "ubuntu@170.106.179.226:/home/ubuntu/workspaces",
+      "role": "remote-first owning source",
+      "owned_boundaries": ["Mortis / multica 主产品源码；远程共同源码根"],
+      "first_party_commits": "yes, but only on verified remote source root",
       "remote": "mortis-multica-source",
+      "source_ide": "server-170 code-server via ssh -L 18080:127.0.0.1:18080 server-170",
+      "deploy_target": "ubuntu@124.220.233.126:/srv/multica",
       "sync_order": 1
     }
   ],

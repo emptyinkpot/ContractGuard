@@ -24,13 +24,24 @@
       "auto_push_enabled": true
     },
     {
-      "path": "E:\\My Project\\Mortis",
-      "role": "owning repo",
-      "owned_boundaries": ["Mortis / multica 主产品源码真源"],
-      "first_party_commits": "yes",
+      "path": "ubuntu@170.106.179.226:/home/ubuntu/workspaces",
+      "role": "remote-first owning source",
+      "owned_boundaries": ["Mortis / multica 主产品源码真源；远程共同源码根；多人/多 agent 协作 IDE 面"],
+      "first_party_commits": "yes, but only on verified remote source root",
       "remote": "mortis-multica-source",
       "sync_order": 1,
-      "auto_push_enabled": true
+      "auto_push_enabled": true,
+      "source_root_policy": "do not recreate E:\\My Project\\Mortis or .codex\\.tmp\\mortis-multica-source-working as a standing local checkout",
+      "source_ide": {
+        "server_alias": "server-170",
+        "host": "170.106.179.226",
+        "ssh_user": "ubuntu",
+        "workspace_root": "/home/ubuntu/workspaces",
+        "service": "code-server",
+        "access": "ssh -L 18080:127.0.0.1:18080 server-170 -> http://127.0.0.1:18080"
+      },
+      "deploy_target": "ubuntu@124.220.233.126:/srv/multica",
+      "note": "The deploy target is runtime/deploy material only unless explicitly verified as the remote source/IDE root."
     },
     {
       "path": "E:\\My Project\\MyBlog",
@@ -92,8 +103,8 @@
   "comments": {
     "extracted_from": "C:\\Users\\ASUS-KL\\.codex\\REPO-OWNERSHIP-MAP.md",
     "key_rules": [
-      "对 repo-managed code，GitHub 中 owning repo 是唯一长期 source of truth",
-      "不要默认在 deploy server 上并行维护源码",
+      "对 remote-first repo，已声明的远程共同源码根是第一手 authoring truth；GitHub 是交付历史",
+      "不要默认在本机恢复常驻源码副本，也不要默认把 deploy runtime 当源码 IDE 根",
       "先按 repo role + change boundary 判断，不按仓大/仓小或路径远近判断"
     ]
   }
