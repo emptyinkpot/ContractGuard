@@ -14,6 +14,7 @@ machineReadableEntry: project.json
 localSourceRoot: E:\My Project\ContractGuard
 codexCompatRoot: codex
 githubRepo: local-only
+githubUrl: https://github.com/emptyinkpot/ContractGuard
 defaultBranch: main
 guardRoot: guards/ai-behavior
 schemaRoot: templates/project-contract

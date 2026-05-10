@@ -3,7 +3,13 @@
   "projectName": "ContractGuard",
   "canonicalDoc": "README.md",
   "machineReadableEntry": "project.json",
-  "githubRepo": "local-only",
+  "githubRepo": "https://github.com/emptyinkpot/ContractGuard",
+  "visibility": "public",
+  "repositoryStandard": {
+    "contributing": "CONTRIBUTING.md",
+    "security": "SECURITY.md",
+    "support": "SUPPORT.md"
+  },
   "defaultBranch": "main",
   "localSourceRoot": "E:\\My Project\\ContractGuard",
   "codexCompatRoot": "codex",
