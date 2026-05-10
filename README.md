@@ -57,6 +57,7 @@ ContractGuard 是一个面向通用工程仓的治理项目。它负责两件事
 - diff gate hook：`guards/ai-behavior/hooks/invoke-diff-gate.ps1`
 - project contract schema：`templates/project-contract/project.schema.json`
 - schema validator：`tools/validate-project-contract.mjs`
+- project.json ecosystem checker：`tools/check-project-json.mjs`
 
 ### 0.3 仓库信息卡
 
@@ -111,6 +112,7 @@ consumer repo
 - `guards/ai-behavior/core/check-frontend-design-closeout.mjs` 是 canonical frontend design closeout gate CLI。
 - `tools/task-pipeline/run-task-pipeline.mjs` 是 canonical task pipeline CLI。
 - `tools/task-pipeline/policy/task-pipeline-policy.json` 是 canonical task pipeline policy。
+- `tools/check-project-json.mjs` 是 canonical project.json ecosystem checker，用于检查仓库身份卡、source/fork/mirror 边界与生产 runbook 入口。
 - `codex/` 是面向 Codex execution gateway 的兼容入口根。
 - `C:\Users\ASUS-KL\.codex\rules\contractguard-gateway.json` 是全局 Codex gateway 指向 `ContractGuard` 的 machine contract。
 
@@ -124,6 +126,23 @@ consumer repo
 | `templates/project-contract` | `project.json` 合同模板与 schema |
 | `tools` | 本地 validator 与辅助工具 |
 | `docs` | 接入说明、迁移说明与 consumer 指南 |
+
+### 1.3.1 Project JSON Ecosystem Gate
+
+`tools/check-project-json.mjs` 是跨仓库身份门禁。它比普通 JSON parse 更严格，默认检查：
+
+- `project.json` 必填身份字段。
+- `README.md` 是否有身份卡。
+- legacy/watch/mirror 仓库不能声明 `preferredSource=true`。
+- watch/mirror 仓库必须声明 `deployFromHere=false`。
+- GitHub fork 与 manual mirror 是否声明 upstream。
+- 生产面仓库是否有 `docs/runtime/production-runbook.md` 或显式 runbook 替代入口。
+
+运行示例：
+
+```powershell
+node tools/check-project-json.mjs --repo-root "E:\My Project\DataBase" --strict
+```
 
 ### 1.4 Frontend Minimal Gate
 

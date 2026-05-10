@@ -43,5 +43,20 @@
   ],
   "frontendContractTemplate": "templates/project-contract/frontend-ui-contract.template.md",
   "frontendDesignCloseoutSchema": "templates/project-contract/frontend-design-closeout.schema.json",
-  "frontendDesignGateCli": "guards/ai-behavior/core/check-frontend-design-closeout.mjs"
+  "frontendDesignGateCli": "guards/ai-behavior/core/check-frontend-design-closeout.mjs",
+  "repositoryRole": "repository-governance-and-ai-behavior-gates",
+  "supplies": [
+    "project.json checker",
+    "AI behavior gates",
+    "project contract templates",
+    "task pipeline safety gates"
+  ],
+  "consumedBy": [
+    "DataBase",
+    "Mortis",
+    "FuckVideo",
+    "sub2api",
+    "code-server-workspace-infra"
+  ],
+  "projectJsonChecker": "tools/check-project-json.mjs"
 }

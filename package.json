@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "validate:project": "node tools/validate-project-contract.mjs project.json",
+    "check:project-json": "node tools/check-project-json.mjs --repo-root . --strict",
     "selftest:guard": "node guards/ai-behavior/core/check-ai-behavior.mjs --repo-root . --self-test",
     "selftest:guard-regressions": "node tools/selftest-ai-behavior-regressions.mjs",
     "selftest:decision-schema": "node tests/test-decision-schema.mjs",
