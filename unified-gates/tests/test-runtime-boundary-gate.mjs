@@ -26,7 +26,7 @@ if (fail.status === 0) {
 }
 
 const payload = JSON.parse(fail.stdout);
-for (const expected of ["GATE-OBJECTIVE-002", "GATE-RUNTIME-007", "GATE-RUNTIME-008", "GATE-RUNTIME-009", "GATE-RUNTIME-010", "GATE-RUNTIME-011", "GATE-RUNTIME-012"]) {
+for (const expected of ["GATE-OBJECTIVE-002", "GATE-RUNTIME-007", "GATE-RUNTIME-008", "GATE-RUNTIME-009", "GATE-RUNTIME-010", "GATE-RUNTIME-011", "GATE-RUNTIME-012", "GATE-RUNTIME-013"]) {
   if (!payload.errors.some((error) => error.includes(expected))) {
     throw new Error(`missing expected error for ${expected}`);
   }

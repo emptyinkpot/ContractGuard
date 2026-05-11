@@ -3,6 +3,7 @@
     "model": "glm-4-flash",
     "provider": "glm",
     "runtime": "production",
+    "route": "generate-from-db",
     "executionPath": "client>sub2api>glm-provider>glm-4-flash",
     "successCriteria": "glm route restored"
   },
@@ -10,6 +11,7 @@
     "model": "gpt-5.4-mini",
     "provider": "openai",
     "runtime": "production",
+    "route": "generate-from-db",
     "executionPath": "client>sub2api>openai-provider>gpt-5.4-mini",
     "successCriteria": "generated content"
   },
@@ -63,5 +65,13 @@
     "newExecutionPaths": 1,
     "newRegistries": 1,
     "mutationTargets": 1
-  }
+  },
+  "completionClaim": "Gemini is connected and generation ran",
+  "observedExecution": {
+    "model": "glm-4-flash",
+    "provider": "glm",
+    "route": "generate-from-db",
+    "executionPath": "client>sub2api>glm-provider>glm-4-flash"
+  },
+  "observedEvidence": []
 }

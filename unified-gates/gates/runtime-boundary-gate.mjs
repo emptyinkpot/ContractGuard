@@ -155,6 +155,33 @@ function checkStructuralBudget(payload, errors) {
   }
 }
 
+function checkObservedCompletion(payload, errors) {
+  const completionClaim = normalize(payload.completionClaim);
+  if (!completionClaim) {
+    return;
+  }
+
+  const observed = isObject(payload.observedExecution) ? payload.observedExecution : {};
+  const requiredFields = ["model", "provider", "route", "executionPath"];
+  for (const field of requiredFields) {
+    if (!normalize(observed[field])) {
+      errors.push(`GATE-RUNTIME-013 observedExecution.${field} is required for completion claims`);
+    }
+  }
+
+  const requested = isObject(payload.requestedObjective) ? payload.requestedObjective : {};
+  for (const field of requiredFields) {
+    if (requested[field] !== undefined && observed[field] !== undefined && !sameValue(requested[field], observed[field])) {
+      errors.push(`GATE-RUNTIME-013 observed ${field} mismatch: requested=${normalize(requested[field])} observed=${normalize(observed[field])}`);
+    }
+  }
+
+  const evidence = asArray(payload.observedEvidence).map(normalize).filter(Boolean);
+  if (evidence.length === 0) {
+    errors.push("GATE-RUNTIME-013 completion claim requires observedEvidence");
+  }
+}
+
 function main() {
   const payload = JSON.parse(readInput());
   const errors = [];
@@ -170,6 +197,7 @@ function main() {
   checkProviderAuthenticity(payload, errors);
   checkFrozenCriteria(payload, errors);
   checkStructuralBudget(payload, errors);
+  checkObservedCompletion(payload, errors);
 
   process.stdout.write(`${JSON.stringify({ ok: errors.length === 0, gateFamily: "runtime-boundary", errors }, null, 2)}\n`);
 
