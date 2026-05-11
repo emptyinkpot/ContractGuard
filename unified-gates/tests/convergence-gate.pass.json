@@ -1,0 +1,69 @@
+{
+  "task": "connect Gemini to chapter generation and trigger generation",
+  "canonicalExecutionPath": [
+    "generate-from-db",
+    "llm-client",
+    "key-guard",
+    "gemini-provider"
+  ],
+  "allowedSubsystems": [
+    "generate-from-db",
+    "llm-client",
+    "key-guard",
+    "gemini-provider"
+  ],
+  "outOfScopeSubsystems": [
+    "publish-auto",
+    "fanqie",
+    "browser-automation",
+    "coze-gateway"
+  ],
+  "touchedSubsystems": [
+    "generate-from-db",
+    "llm-client",
+    "key-guard",
+    "gemini-provider"
+  ],
+  "explorationBudget": {
+    "repoSearches": 5,
+    "fileReads": 10,
+    "executionBranches": 2,
+    "subsystemsTouched": 4
+  },
+  "actualExploration": {
+    "repoSearches": 3,
+    "fileReads": 5,
+    "executionBranches": 1,
+    "subsystemsTouched": 4
+  },
+  "fileReads": [
+    {
+      "path": "product/novel/app/index.ts",
+      "reason": "contains generate-from-db route",
+      "pathSegment": "generate-from-db"
+    },
+    {
+      "path": "product/novel/core/llm-client.ts",
+      "reason": "generation model call owner",
+      "pathSegment": "llm-client"
+    }
+  ],
+  "steps": [
+    {
+      "id": "call-generate-from-db",
+      "objectiveProgress": true
+    },
+    {
+      "id": "wire-gemini-provider",
+      "objectiveProgress": true
+    }
+  ],
+  "maxConsecutiveNoProgressSteps": 1,
+  "executionBranches": [
+    {
+      "id": "main-generation-path",
+      "status": "active",
+      "terminated": false
+    }
+  ]
+}

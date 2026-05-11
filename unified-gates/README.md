@@ -307,6 +307,7 @@ E:\My Project\ContractGuard\unified-gates\
 │   ├── anti-overengineering-gate.mjs    # anti-overengineering checker ✅
 │   ├── structural-laws-gate.mjs         # structural laws proof checker ✅
 │   ├── runtime-boundary-gate.mjs        # objective / runtime mutation boundary checker ✅
+│   ├── convergence-gate.mjs             # canonical path / exploration budget / relevance checker ✅
 │   ├── frontend-design-gate.mjs         # frontend design closeout checker ✅
 │   ├── pre-commit.mjs                   # 提交前门禁 ✅
 │   ├── pre-push.mjs                     # 推送前门禁 ⏳
@@ -318,6 +319,9 @@ E:\My Project\ContractGuard\unified-gates\
 │
 │   Runtime boundary gate contract:
 │   └── gates/runtime-boundary-gate.mjs   # validates objective integrity, mutation scope, execution path, provider authenticity, frozen success criteria, and structural budget ✅
+│
+│   Convergence gate contract:
+│   └── gates/convergence-gate.mjs        # validates canonical execution path, scope lock, exploration budget, relevance, progress, and dead-end termination ✅
 │
 ├── 🔌 适配器层 (adapters/) - 连接现有系统
 │   ├── codex-adapter.mjs                # Codex 适配器 ⏳

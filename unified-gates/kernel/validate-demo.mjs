@@ -71,6 +71,7 @@ assertRestoreContract(explicitResult.latestCheckpoint, explicitRestoredGraph);
 validateAgainstSchema(executionStateSchema, explicitResult.executionState, "explicit-run.executionState");
 assertExplicitGraphTransition(explicitResult.trace);
 assertRuntimeBoundaryBlocks(kernel, sequentialTask);
+assertConvergenceBlocks(kernel, sequentialTask);
 
 process.stdout.write(
   `${JSON.stringify({
@@ -188,6 +189,64 @@ function assertRuntimeBoundaryBlocks(kernel, baseTask) {
   }
 
   throw new Error("runtime boundary violation must block kernel initialization");
+}
+
+function assertConvergenceBlocks(kernel, baseTask) {
+  const invalidTask = {
+    ...baseTask,
+    convergence: {
+      canonicalExecutionPath: ["generate-from-db", "llm-client", "key-guard", "gemini-provider"],
+      allowedSubsystems: ["generate-from-db", "llm-client", "key-guard", "gemini-provider"],
+      outOfScopeSubsystems: ["publish-auto", "fanqie", "browser-automation", "coze-gateway"],
+      touchedSubsystems: ["generate-from-db", "publish-auto", "fanqie"],
+      explorationBudget: {
+        repoSearches: 5,
+        fileReads: 10,
+        executionBranches: 2,
+        subsystemsTouched: 4
+      },
+      actualExploration: {
+        repoSearches: 12,
+        fileReads: 24,
+        executionBranches: 5,
+        subsystemsTouched: 9
+      },
+      fileReads: [
+        {
+          path: "product/novel/publish-auto.ts",
+          reason: "maybe related"
+        }
+      ],
+      steps: [
+        { id: "scan-repo", objectiveProgress: false },
+        { id: "inspect-publish-auto", objectiveProgress: false }
+      ],
+      maxConsecutiveNoProgressSteps: 1,
+      executionBranches: [
+        {
+          id: "publish-auto-error",
+          status: "dead-end",
+          terminated: false,
+          unrelatedFailure: true,
+          action: "repair"
+        }
+      ]
+    }
+  };
+
+  try {
+    kernel.initialize(invalidTask, {
+      filesystem: "workspace-write",
+      network: "enabled"
+    });
+  } catch (error) {
+    if (!String(error?.message ?? error).includes("convergence gate blocked")) {
+      throw error;
+    }
+    return;
+  }
+
+  throw new Error("convergence violation must block kernel initialization");
 }
 
 function assertEqual(actual, expected, label) {

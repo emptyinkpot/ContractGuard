@@ -10,6 +10,7 @@ import { fileURLToPath } from "node:url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const RUNTIME_BOUNDARY_GATE = path.resolve(__dirname, "..", "..", "gates", "runtime-boundary-gate.mjs");
+const CONVERGENCE_GATE = path.resolve(__dirname, "..", "..", "gates", "convergence-gate.mjs");
 
 export class ExecutionKernel {
   constructor({
@@ -32,6 +33,7 @@ export class ExecutionKernel {
     const classification = this.classifier.classify(task);
     const resolved = this.constraints.resolve(runtimeEnvelope, task);
     this.assertRuntimeBoundary(task);
+    this.assertConvergence(task);
     const graph = this.planner.compile(task, classification.mode, resolved);
     this.assertPathLock(graph);
 
@@ -226,15 +228,27 @@ export class ExecutionKernel {
       return;
     }
 
-    const result = spawnSync(process.execPath, [RUNTIME_BOUNDARY_GATE], {
-      input: `${JSON.stringify(task.runtimeBoundary)}\n`,
-      encoding: "utf8",
-      windowsHide: true
-    });
+    runJsonGate(RUNTIME_BOUNDARY_GATE, task.runtimeBoundary, "runtime boundary gate");
+  }
 
-    if (result.status !== 0) {
-      throw new Error(`runtime boundary gate blocked: ${result.stdout || result.stderr || "no details"}`);
+  assertConvergence(task) {
+    if (!task?.convergence) {
+      return;
     }
+
+    runJsonGate(CONVERGENCE_GATE, task.convergence, "convergence gate");
+  }
+}
+
+function runJsonGate(gatePath, payload, label) {
+  const result = spawnSync(process.execPath, [gatePath], {
+    input: `${JSON.stringify(payload)}\n`,
+    encoding: "utf8",
+    windowsHide: true
+  });
+
+  if (result.status !== 0) {
+    throw new Error(`${label} blocked: ${result.stdout || result.stderr || "no details"}`);
   }
 }
 
