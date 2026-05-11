@@ -1,0 +1,67 @@
+{
+  "requestedObjective": {
+    "model": "glm-4-flash",
+    "provider": "glm",
+    "runtime": "production",
+    "executionPath": "client>sub2api>glm-provider>glm-4-flash",
+    "successCriteria": "glm route restored"
+  },
+  "actualObjective": {
+    "model": "gpt-5.4-mini",
+    "provider": "openai",
+    "runtime": "production",
+    "executionPath": "client>sub2api>openai-provider>gpt-5.4-mini",
+    "successCriteria": "generated content"
+  },
+  "allowedMutationTargets": [],
+  "mutations": [
+    {
+      "target": "key-guard-registry",
+      "production": true
+    }
+  ],
+  "productionTouched": true,
+  "productionMutation": true,
+  "canonicalExecutionPath": [
+    "client",
+    "sub2api",
+    "glm-provider",
+    "glm-4-flash"
+  ],
+  "actualExecutionPath": [
+    "client",
+    "sub2api",
+    "openai-provider",
+    "gpt-5.4-mini"
+  ],
+  "providerAuthenticityRequired": true,
+  "providerProof": {
+    "upstream": "openai",
+    "model": "gpt-5.4-mini",
+    "endpoint": "https://example.invalid/compat",
+    "authDomain": "example.invalid",
+    "responseSource": "proxy",
+    "isProxy": true
+  },
+  "frozenSuccessCriteria": [
+    "glm route restored",
+    "provider=glm",
+    "model=glm-4-flash"
+  ],
+  "verifiedSuccessCriteria": [
+    "generated content"
+  ],
+  "completionSignals": [
+    "HTTP 200",
+    "generated content",
+    "alternate provider success"
+  ],
+  "actualStructuralDelta": {
+    "newFiles": 1,
+    "newAbstractions": 1,
+    "newProviders": 1,
+    "newExecutionPaths": 1,
+    "newRegistries": 1,
+    "mutationTargets": 1
+  }
+}

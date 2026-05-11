@@ -4,6 +4,12 @@ import { PlanCompiler } from "./plan-compiler.mjs";
 import { GraphScheduler } from "./graph-scheduler.mjs";
 import { CheckpointStore } from "./checkpoint-store.mjs";
 import { ObservabilityTrace } from "./observability-trace.mjs";
+import { spawnSync } from "node:child_process";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const RUNTIME_BOUNDARY_GATE = path.resolve(__dirname, "..", "..", "gates", "runtime-boundary-gate.mjs");
 
 export class ExecutionKernel {
   constructor({
@@ -25,6 +31,7 @@ export class ExecutionKernel {
   initialize(task, runtimeEnvelope = {}) {
     const classification = this.classifier.classify(task);
     const resolved = this.constraints.resolve(runtimeEnvelope, task);
+    this.assertRuntimeBoundary(task);
     const graph = this.planner.compile(task, classification.mode, resolved);
     this.assertPathLock(graph);
 
@@ -211,6 +218,22 @@ export class ExecutionKernel {
     }
     if (pathLock.hotfixPolicy !== "disabled") {
       throw new Error("strict scheduler forbids hotfix policy");
+    }
+  }
+
+  assertRuntimeBoundary(task) {
+    if (!task?.runtimeBoundary) {
+      return;
+    }
+
+    const result = spawnSync(process.execPath, [RUNTIME_BOUNDARY_GATE], {
+      input: `${JSON.stringify(task.runtimeBoundary)}\n`,
+      encoding: "utf8",
+      windowsHide: true
+    });
+
+    if (result.status !== 0) {
+      throw new Error(`runtime boundary gate blocked: ${result.stdout || result.stderr || "no details"}`);
     }
   }
 }

@@ -1,13 +1,16 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { ExecutionKernel } from "./core/execution-kernel.mjs";
+import { CheckpointStore } from "./core/checkpoint-store.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const schemaDir = path.join(__dirname, "contracts");
 const examplesDir = path.join(__dirname, "examples");
+const checkpointRoot = fs.mkdtempSync(path.join(os.tmpdir(), "contractguard-kernel-checkpoints-"));
 
 const executionGraphSchema = readJson(path.join(schemaDir, "execution-graph.schema.json"));
 const checkpointSchema = readJson(path.join(schemaDir, "checkpoint.schema.json"));
@@ -19,7 +22,9 @@ const sequentialTask = readJson(path.join(examplesDir, "sequential-task.json"));
 
 validateAgainstSchema(executionGraphSchema, explicitGraph, "examples/explicit-graph.json");
 
-const kernel = new ExecutionKernel();
+const kernel = new ExecutionKernel({
+  checkpoints: new CheckpointStore({ root: path.join(checkpointRoot, "sequential") })
+});
 const result = await kernel.run(sequentialTask, {
   runtimeEnvelope: {
     filesystem: "workspace-write",
@@ -43,7 +48,9 @@ const restoredGraph = kernel.checkpoints.restoreGraph(result.latestCheckpoint);
 validateAgainstSchema(executionGraphSchema, restoredGraph, "run-result.restoredGraph");
 assertRestoreContract(result.latestCheckpoint, restoredGraph);
 
-const explicitKernel = new ExecutionKernel();
+const explicitKernel = new ExecutionKernel({
+  checkpoints: new CheckpointStore({ root: path.join(checkpointRoot, "explicit") })
+});
 const explicitResult = await explicitKernel.run(explicitGraph, {
   runtimeEnvelope: {
     filesystem: "workspace-write",
@@ -63,6 +70,7 @@ validateAgainstSchema(executionGraphSchema, explicitRestoredGraph, "explicit-run
 assertRestoreContract(explicitResult.latestCheckpoint, explicitRestoredGraph);
 validateAgainstSchema(executionStateSchema, explicitResult.executionState, "explicit-run.executionState");
 assertExplicitGraphTransition(explicitResult.trace);
+assertRuntimeBoundaryBlocks(kernel, sequentialTask);
 
 process.stdout.write(
   `${JSON.stringify({
@@ -120,6 +128,66 @@ function assertExplicitGraphTransition(trace) {
   if (!committed) {
     throw new Error("explicit graph must commit emit-report after dependency wait");
   }
+}
+
+function assertRuntimeBoundaryBlocks(kernel, baseTask) {
+  const invalidTask = {
+    ...baseTask,
+    runtimeBoundary: {
+      requestedObjective: {
+        model: "glm-4-flash",
+        provider: "glm",
+        executionPath: "client>sub2api>glm-provider>glm-4-flash",
+        successCriteria: "glm route restored"
+      },
+      actualObjective: {
+        model: "gpt-5.4-mini",
+        provider: "openai",
+        executionPath: "client>sub2api>openai-provider>gpt-5.4-mini",
+        successCriteria: "generated content"
+      },
+      allowedMutationTargets: [],
+      mutations: [{ target: "key-guard-registry", production: true }],
+      productionTouched: true,
+      productionMutation: true,
+      canonicalExecutionPath: ["client", "sub2api", "glm-provider", "glm-4-flash"],
+      actualExecutionPath: ["client", "sub2api", "openai-provider", "gpt-5.4-mini"],
+      providerAuthenticityRequired: true,
+      providerProof: {
+        upstream: "openai",
+        model: "gpt-5.4-mini",
+        endpoint: "https://example.invalid/compat",
+        authDomain: "example.invalid",
+        responseSource: "proxy",
+        isProxy: true
+      },
+      frozenSuccessCriteria: ["glm route restored", "provider=glm", "model=glm-4-flash"],
+      verifiedSuccessCriteria: ["generated content"],
+      completionSignals: ["HTTP 200", "alternate provider success"],
+      actualStructuralDelta: {
+        newFiles: 1,
+        newAbstractions: 1,
+        newProviders: 1,
+        newExecutionPaths: 1,
+        newRegistries: 1,
+        mutationTargets: 1
+      }
+    }
+  };
+
+  try {
+    kernel.initialize(invalidTask, {
+      filesystem: "workspace-write",
+      network: "enabled"
+    });
+  } catch (error) {
+    if (!String(error?.message ?? error).includes("runtime boundary gate blocked")) {
+      throw error;
+    }
+    return;
+  }
+
+  throw new Error("runtime boundary violation must block kernel initialization");
 }
 
 function assertEqual(actual, expected, label) {

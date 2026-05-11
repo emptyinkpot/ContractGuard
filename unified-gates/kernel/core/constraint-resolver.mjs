@@ -16,13 +16,27 @@ export class ConstraintResolver {
 }
 
 function normalizeConstraintList(constraints) {
-  return constraints
-    .filter((value) => typeof value === "string" && value.length > 0)
-    .map((value) => ({
-      id: toConstraintId(value),
-      source: "task.constraints",
-      value
-    }));
+  if (Array.isArray(constraints)) {
+    return constraints
+      .filter((value) => typeof value === "string" && value.length > 0)
+      .map((value) => ({
+        id: toConstraintId(value),
+        source: "task.constraints",
+        value
+      }));
+  }
+
+  if (constraints && typeof constraints === "object") {
+    return Object.entries(constraints)
+      .filter(([key]) => typeof key === "string" && key.length > 0)
+      .map(([key, value]) => ({
+        id: toConstraintId(key),
+        source: `task.constraints.${key}`,
+        value
+      }));
+  }
+
+  return [];
 }
 
 function deriveRuntimeConstraints(runtimeEnvelope) {

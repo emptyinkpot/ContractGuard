@@ -306,6 +306,7 @@ E:\My Project\ContractGuard\unified-gates\
 │   ├── mode-classification-gate.mjs     # execution mode / RCA checker ✅
 │   ├── anti-overengineering-gate.mjs    # anti-overengineering checker ✅
 │   ├── structural-laws-gate.mjs         # structural laws proof checker ✅
+│   ├── runtime-boundary-gate.mjs        # objective / runtime mutation boundary checker ✅
 │   ├── frontend-design-gate.mjs         # frontend design closeout checker ✅
 │   ├── pre-commit.mjs                   # 提交前门禁 ✅
 │   ├── pre-push.mjs                     # 推送前门禁 ⏳
@@ -314,6 +315,9 @@ E:\My Project\ContractGuard\unified-gates\
 │
 │   Structural laws gate contract:
 │   └── docs/structural-laws-gate.md      # structural gate modes and contract ✅
+│
+│   Runtime boundary gate contract:
+│   └── gates/runtime-boundary-gate.mjs   # validates objective integrity, mutation scope, execution path, provider authenticity, frozen success criteria, and structural budget ✅
 │
 ├── 🔌 适配器层 (adapters/) - 连接现有系统
 │   ├── codex-adapter.mjs                # Codex 适配器 ⏳

@@ -132,6 +132,12 @@ function planChecks(mode, stagedFiles) {
       args: [path.join(repoRootDefault, "unified-gates", "tests", "test-structural-laws-gate.mjs")],
     },
     {
+      id: "runtime-boundary-selftest",
+      label: "runtime boundary gate self-test",
+      command: NODE,
+      args: [path.join(repoRootDefault, "unified-gates", "tests", "test-runtime-boundary-gate.mjs")],
+    },
+    {
       id: "decision-schema-selftest",
       label: "decision schema self-test",
       command: NODE,

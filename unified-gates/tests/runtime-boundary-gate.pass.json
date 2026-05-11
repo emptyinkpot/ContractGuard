@@ -1,0 +1,83 @@
+{
+  "requestedObjective": {
+    "model": "glm-4-flash",
+    "provider": "glm",
+    "runtime": "production",
+    "transport": "sub2api",
+    "executionPath": "client>sub2api>glm-provider>glm-4-flash",
+    "successCriteria": "glm route restored"
+  },
+  "actualObjective": {
+    "model": "glm-4-flash",
+    "provider": "glm",
+    "runtime": "production",
+    "transport": "sub2api",
+    "executionPath": "client>sub2api>glm-provider>glm-4-flash",
+    "successCriteria": "glm route restored"
+  },
+  "allowedMutationTargets": [
+    "glm-provider-config"
+  ],
+  "mutations": [
+    {
+      "target": "glm-provider-config",
+      "production": true
+    }
+  ],
+  "productionTouched": true,
+  "productionMutation": true,
+  "productionAuthorization": true,
+  "productionMutationAuthorization": true,
+  "canonicalExecutionPath": [
+    "client",
+    "sub2api",
+    "glm-provider",
+    "glm-4-flash"
+  ],
+  "actualExecutionPath": [
+    "client",
+    "sub2api",
+    "glm-provider",
+    "glm-4-flash"
+  ],
+  "providerAuthenticityRequired": true,
+  "providerProof": {
+    "upstream": "glm",
+    "model": "glm-4-flash",
+    "endpoint": "https://open.bigmodel.cn/api/paas/v4/chat/completions",
+    "authDomain": "bigmodel.cn",
+    "responseSource": "glm",
+    "isProxy": false,
+    "isFallback": false,
+    "isMock": false,
+    "isCache": false,
+    "isCompatibilityEndpoint": false
+  },
+  "frozenSuccessCriteria": [
+    "glm route restored",
+    "provider=glm",
+    "model=glm-4-flash"
+  ],
+  "verifiedSuccessCriteria": [
+    "glm route restored",
+    "provider=glm",
+    "model=glm-4-flash"
+  ],
+  "completionSignals": [],
+  "structuralBudget": {
+    "newFiles": 0,
+    "newAbstractions": 0,
+    "newProviders": 0,
+    "newExecutionPaths": 0,
+    "newRegistries": 0,
+    "mutationTargets": 1
+  },
+  "actualStructuralDelta": {
+    "newFiles": 0,
+    "newAbstractions": 0,
+    "newProviders": 0,
+    "newExecutionPaths": 0,
+    "newRegistries": 0,
+    "mutationTargets": 1
+  }
+}
