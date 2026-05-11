@@ -305,11 +305,15 @@ E:\My Project\ContractGuard\unified-gates\
 │   ├── architecture-boundary-gate.mjs   # architecture boundary checker ✅
 │   ├── mode-classification-gate.mjs     # execution mode / RCA checker ✅
 │   ├── anti-overengineering-gate.mjs    # anti-overengineering checker ✅
+│   ├── structural-laws-gate.mjs         # structural laws proof checker ✅
 │   ├── frontend-design-gate.mjs         # frontend design closeout checker ✅
 │   ├── pre-commit.mjs                   # 提交前门禁 ✅
 │   ├── pre-push.mjs                     # 推送前门禁 ⏳
 │   ├── post-push.mjs                    # 推送后门禁 ⏳
 │   └── pre-deploy.mjs                   # 部署前门禁 ⏳
+│
+│   Structural laws gate contract:
+│   └── docs/structural-laws-gate.md      # structural gate modes and contract ✅
 │
 ├── 🔌 适配器层 (adapters/) - 连接现有系统
 │   ├── codex-adapter.mjs                # Codex 适配器 ⏳

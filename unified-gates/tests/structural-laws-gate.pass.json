@@ -1,0 +1,52 @@
+{
+  "canonicalPath": {
+    "realOwner": "features/novel/domain",
+    "realEntry": "features/novel/index.ts",
+    "dataFlow": [
+      "view",
+      "application",
+      "domain"
+    ]
+  },
+  "rootCause": {
+    "producingLayer": "domain",
+    "propagationPath": [
+      "domain",
+      "application",
+      "view"
+    ],
+    "fixedAtProducingLayer": true
+  },
+  "minimalChangeProof": {
+    "whyNoHelper": "The existing domain owner contains the rule.",
+    "whyNoAdapter": "The public entry already exposes the capability.",
+    "whyNoFallback": "Invalid state is rejected at the owner.",
+    "whyNoWrapper": "The call path remains direct.",
+    "deleteOrCollapseConsidered": true
+  },
+  "entropyDelta": {
+    "newFiles": 0,
+    "newPaths": 0,
+    "newAbstractions": 0,
+    "newIndirections": 0,
+    "newStateOwners": 0,
+    "newDependencies": 0,
+    "newNormalizationSurfaces": 0,
+    "deletedFiles": 1,
+    "collapsedPaths": 1
+  },
+  "forbiddenSurfaces": {
+    "helperPatch": false,
+    "adapterPatch": false,
+    "fallbackPath": false,
+    "wrapperChain": false,
+    "compatibilityShim": false,
+    "silentTolerance": false,
+    "hiddenState": false,
+    "hardcoding": false
+  },
+  "touchedPaths": [
+    "features/novel/domain/chapter-contract.ts",
+    "features/novel/index.ts"
+  ]
+}

@@ -126,6 +126,12 @@ function planChecks(mode, stagedFiles) {
       args: [path.join(repoRootDefault, "tools", "selftest-ai-behavior-regressions.mjs")],
     },
     {
+      id: "structural-laws-selftest",
+      label: "structural laws gate self-test",
+      command: NODE,
+      args: [path.join(repoRootDefault, "unified-gates", "tests", "test-structural-laws-gate.mjs")],
+    },
+    {
       id: "decision-schema-selftest",
       label: "decision schema self-test",
       command: NODE,

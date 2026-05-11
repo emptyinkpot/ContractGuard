@@ -1,0 +1,47 @@
+{
+  "canonicalPath": {
+    "realOwner": "features/novel/view",
+    "realEntry": "",
+    "dataFlow": []
+  },
+  "rootCause": {
+    "producingLayer": "domain",
+    "propagationPath": [
+      "domain",
+      "view"
+    ],
+    "fixedAtProducingLayer": false
+  },
+  "minimalChangeProof": {
+    "whyNoHelper": "",
+    "whyNoAdapter": "Skipped.",
+    "whyNoFallback": "",
+    "whyNoWrapper": "",
+    "deleteOrCollapseConsidered": false
+  },
+  "entropyDelta": {
+    "newFiles": 2,
+    "newPaths": 1,
+    "newAbstractions": 1,
+    "newIndirections": 1,
+    "newStateOwners": 0,
+    "newDependencies": 0,
+    "newNormalizationSurfaces": 1,
+    "deletedFiles": 0,
+    "collapsedPaths": 0
+  },
+  "forbiddenSurfaces": {
+    "helperPatch": true,
+    "adapterPatch": false,
+    "fallbackPath": true,
+    "wrapperChain": false,
+    "compatibilityShim": false,
+    "silentTolerance": true,
+    "hiddenState": false,
+    "hardcoding": true
+  },
+  "touchedPaths": [
+    "features/novel/helper-normalizer.ts",
+    "features/novel/fallback-path.ts"
+  ]
+}
